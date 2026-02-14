@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -11,9 +13,10 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('EcoBazzar Hub'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.logout_rounded),
             onPressed: () {
-              // Action here
+              ref.read(authViewModelProvider.notifier).logout();
+              context.go('/login');
             },
           ),
         ],

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "951552864785",
+    "project_id": "ecobazzarhub-74abb",
+    "storage_bucket": "ecobazzarhub-74abb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951552864785:android:0965c7c03ba34ee4dc77b0",
+        "android_client_info": {
+          "package_name": "com.example.eco_bazzar_hub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMm58mDGzxF0WQM5OHGWQWa9m6VE2pnQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
