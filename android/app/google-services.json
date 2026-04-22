@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "951552864785-rs2hgdddie9dv10a2sssa8asl74chq1u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eco_bazzar_hub",
+            "certificate_hash": "ae06d9146f9cb4cf5fd2b30cd15a5feaa9f56356"
+          }
+        },
+        {
           "client_id": "951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "951552864785-vh1nkg7677k3kr7o78gvjdgu01d2pb7a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ecoBazzarHub"
+              }
             }
           ]
         }

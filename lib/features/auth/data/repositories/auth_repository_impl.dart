@@ -6,7 +6,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthRepositoryImpl implements IAuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   // Use named constructor or default for newer versions
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // For Android, Google Sign-In usually finds the configuration automatically.
+  // However, on some environments or for specific features, providing the webClientId (client_type: 3) is required.
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    // Get this from google-services.json (client_type: 3)
+    serverClientId: '951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com',
+  );
 
   @override
   Future<UserEntity?> login(String email, String password) async {
@@ -51,6 +56,12 @@ class AuthRepositoryImpl implements IAuthRepository {
       final userCredential = await _auth.signInWithCredential(credential);
       return _mapFirebaseUserToEntity(userCredential.user);
     } catch (e) {
+      if (e.toString().contains('sign_in_failed')) {
+        throw Exception(
+          'Google Sign-In Failed: This is often caused by a missing SHA-1 fingerprint in Firebase Console. '
+          'Please ensure you have added your debug and release SHA-1 keys to the Firebase project settings.',
+        );
+      }
       rethrow;
     }
   }

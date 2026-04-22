@@ -9,6 +9,7 @@ import 'package:eco_bazzar_hub/features/auth/presentation/screens/otp_screen.dar
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/new_password_screen.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:eco_bazzar_hub/features/home/presentation/screens/home_screen.dart';
+import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -42,7 +43,7 @@ final appRouter = GoRouter(
       path: '/theme-selection',
       builder: (context, state) => const ThemeSelectionScreen(),
     ),
-    GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+    GoRoute(path: '/home', builder: (context, state) => const DashboardScreen()),
     GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
   ],
 );
