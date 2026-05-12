@@ -1,4 +1,7 @@
+import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:eco_bazzar_hub/features/auth/presentation/screens/login_screen.dart';
 import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:eco_bazzar_hub/features/favourites/presentation/screens/favourites_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +13,11 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authState = ref.watch(authViewModelProvider);
+    final user = authState.user;
+    final userName = user?.name ?? 'Guest User';
+    final userEmail = user?.email ?? 'guest@ecobazzar.com';
+    final userPhoto = user?.photoUrl;
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.grey[50],
@@ -46,14 +54,17 @@ class ProfileScreen extends ConsumerWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: const CircleAvatar(
+                          child: CircleAvatar(
                             radius: 55,
-                            backgroundImage: NetworkImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop'),
+                            backgroundImage: userPhoto != null
+                                ? NetworkImage(userPhoto)
+                                : const NetworkImage(
+                                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop'),
                           ),
                         ).animate().scale(duration: 600.ms),
                         const SizedBox(height: 16),
                         Text(
-                          'Milan Ghimire',
+                          userName,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 26,
@@ -61,7 +72,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          'milan.ghimire@example.com',
+                          userEmail,
                           style: GoogleFonts.outfit(
                             color: Colors.white70,
                             fontSize: 14,
@@ -136,7 +147,7 @@ class ProfileScreen extends ConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () => _showLogoutDialog(context, ref),
                         icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                         label: Text(
                           'Logout',
@@ -161,6 +172,149 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: 'Logout',
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (_, __, ___) => Container(),
+      transitionBuilder: (context, anim, _, __) {
+        return ScaleTransition(
+          scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+          child: FadeTransition(
+            opacity: anim,
+            child: AlertDialog(
+              backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28)),
+              contentPadding: EdgeInsets.zero,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 100,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(28)),
+                      gradient: LinearGradient(
+                        colors: [Colors.red[700]!, Colors.red[400]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.logout_rounded,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Sign Out?',
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'You will be signed out of your account. You can always sign back in.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.outfit(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: OutlinedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  side:
+                                      BorderSide(color: Colors.grey[300]!),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Cancel',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  ref
+                                      .read(authViewModelProvider.notifier)
+                                      .logout();
+                                  // Reset dashboard index to avoid crash when tabs change
+                                  ref.read(dashboardIndexProvider.notifier).state = 0;
+                                  Navigator.of(context)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (_) => const LoginScreen(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red[600],
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Sign Out',
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -189,7 +343,12 @@ class ProfileScreen extends ConsumerWidget {
           icon: Icons.favorite_border_rounded,
           label: 'Wishlist',
           color: Colors.red,
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              ref.context,
+              MaterialPageRoute(builder: (context) => const FavouritesScreen()),
+            );
+          },
         ),
         const SizedBox(width: 16),
         _ActivityCard(

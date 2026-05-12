@@ -10,7 +10,8 @@ class AuthRepositoryImpl implements IAuthRepository {
   // However, on some environments or for specific features, providing the webClientId (client_type: 3) is required.
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     // Get this from google-services.json (client_type: 3)
-    serverClientId: '951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com',
+    serverClientId:
+        '951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com',
   );
 
   @override
@@ -64,6 +65,32 @@ class AuthRepositoryImpl implements IAuthRepository {
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<UserEntity?> signInWithGoogleSilently() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn
+          .signInSilently();
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      return _mapFirebaseUserToEntity(userCredential.user);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  UserEntity? getCurrentUser() {
+    return _mapFirebaseUserToEntity(_auth.currentUser);
   }
 
   @override

@@ -30,6 +30,12 @@ final signUpUseCaseProvider = Provider(
 final googleSignInUseCaseProvider = Provider(
   (ref) => GoogleSignInUseCase(ref.watch(authRepositoryProvider)),
 );
+final googleSilentSignInUseCaseProvider = Provider(
+  (ref) => GoogleSilentSignInUseCase(ref.watch(authRepositoryProvider)),
+);
+final getCurrentUserUseCaseProvider = Provider(
+  (ref) => GetCurrentUserUseCase(ref.watch(authRepositoryProvider)),
+);
 final resetPasswordUseCaseProvider = Provider(
   (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
@@ -39,16 +45,22 @@ class AuthViewModel extends StateNotifier<AuthState> {
   final LoginUseCase _loginUseCase;
   final SignUpUseCase _signUpUseCase;
   final GoogleSignInUseCase _googleSignInUseCase;
+  final GoogleSilentSignInUseCase _googleSilentSignInUseCase;
+  final GetCurrentUserUseCase _getCurrentUserUseCase;
   final ResetPasswordUseCase _resetPasswordUseCase;
 
   AuthViewModel({
     required LoginUseCase loginUseCase,
     required SignUpUseCase signUpUseCase,
     required GoogleSignInUseCase googleSignInUseCase,
+    required GoogleSilentSignInUseCase googleSilentSignInUseCase,
+    required GetCurrentUserUseCase getCurrentUserUseCase,
     required ResetPasswordUseCase resetPasswordUseCase,
   }) : _loginUseCase = loginUseCase,
        _signUpUseCase = signUpUseCase,
        _googleSignInUseCase = googleSignInUseCase,
+       _googleSilentSignInUseCase = googleSilentSignInUseCase,
+       _getCurrentUserUseCase = getCurrentUserUseCase,
        _resetPasswordUseCase = resetPasswordUseCase,
        super(AuthState());
 
@@ -82,6 +94,26 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> tryAutoLogin() async {
+    final currentUser = _getCurrentUserUseCase.execute();
+    if (currentUser != null) {
+      state = state.copyWith(user: currentUser);
+      return;
+    }
+
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await _googleSilentSignInUseCase.execute();
+      if (user != null) {
+        state = state.copyWith(user: user, isLoading: false);
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> resetPassword(String email) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -104,6 +136,8 @@ final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
     loginUseCase: ref.watch(loginUseCaseProvider),
     signUpUseCase: ref.watch(signUpUseCaseProvider),
     googleSignInUseCase: ref.watch(googleSignInUseCaseProvider),
+    googleSilentSignInUseCase: ref.watch(googleSilentSignInUseCaseProvider),
+    getCurrentUserUseCase: ref.watch(getCurrentUserUseCaseProvider),
     resetPasswordUseCase: ref.watch(resetPasswordUseCaseProvider),
   );
 });

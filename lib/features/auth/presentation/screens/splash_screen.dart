@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:eco_bazzar_hub/core/providers.dart';
+import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
     if (isFirstTime) {
       context.go('/onboarding');
+      return;
+    }
+
+    await ref.read(authViewModelProvider.notifier).tryAutoLogin();
+    final authState = ref.read(authViewModelProvider);
+    if (!mounted) return;
+    if (authState.user != null) {
+      context.go('/home');
     } else {
       context.go('/login');
     }

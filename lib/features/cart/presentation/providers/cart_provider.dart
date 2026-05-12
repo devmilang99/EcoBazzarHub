@@ -34,10 +34,11 @@ class CartState {
     String? voucher,
     double? taxRate,
     String? paymentMethod,
+    bool clearVoucher = false,
   }) {
     return CartState(
       items: items ?? this.items,
-      voucher: voucher ?? this.voucher,
+      voucher: clearVoucher ? null : (voucher ?? this.voucher),
       taxRate: taxRate ?? this.taxRate,
       paymentMethod: paymentMethod ?? this.paymentMethod,
     );
@@ -99,8 +100,17 @@ class CartNotifier extends StateNotifier<CartState> {
     );
   }
 
+  void toggleAll(bool isSelected) {
+    state = state.copyWith(
+      items: state.items.map((item) => item.copyWith(isSelected: isSelected)).toList(),
+    );
+  }
+
   void applyVoucher(String? voucherCode) {
-    state = state.copyWith(voucher: voucherCode);
+    state = state.copyWith(
+      voucher: voucherCode,
+      clearVoucher: voucherCode == null,
+    );
   }
 
   void updatePaymentMethod(String paymentMethod) {
@@ -109,6 +119,12 @@ class CartNotifier extends StateNotifier<CartState> {
 
   void clearCart() {
     state = state.copyWith(items: []);
+  }
+
+  void clearSelectedItems() {
+    state = state.copyWith(
+      items: state.items.where((item) => !item.isSelected).toList(),
+    );
   }
 }
 

@@ -1,3 +1,5 @@
+import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
+import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -247,12 +249,39 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            for (int i = 0; i < _quantity; i++) {
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .addToCart(widget.product);
+                            }
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    '${_quantity}x ${widget.product.name} added to cart'),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                duration: const Duration(seconds: 1),
+                                action: SnackBarAction(
+                                  label: 'View',
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    ref
+                                        .read(dashboardIndexProvider.notifier)
+                                        .state = 1;
+                                  },
+                                ),
+                              ),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
                             elevation: 0,
                           ),
                           child: Row(
@@ -262,7 +291,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               const SizedBox(width: 10),
                               Text(
                                 'Add to Cart',
-                                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                                style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),

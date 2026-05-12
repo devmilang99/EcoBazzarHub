@@ -1,3 +1,4 @@
+import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
 import 'package:eco_bazzar_hub/features/cart/presentation/screens/cart_screen.dart';
 import 'package:eco_bazzar_hub/features/home/presentation/screens/home_screen.dart';
@@ -18,6 +19,8 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(dashboardIndexProvider);
     final cartItemsCount = ref.watch(cartProvider).items.length;
+    final authState = ref.watch(authViewModelProvider);
+    final userPhotoUrl = authState.user?.photoUrl;
 
     final List<Widget> screens = [
       const HomeScreen(),
@@ -66,7 +69,7 @@ class DashboardScreen extends ConsumerWidget {
               fontSize: 11,
             ),
             items: [
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home_rounded),
                 label: 'Home',
@@ -92,14 +95,33 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 label: 'Cart',
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.history_outlined),
                 activeIcon: Icon(Icons.history_rounded),
                 label: 'Orders',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline_rounded),
-                activeIcon: Icon(Icons.person_rounded),
+                icon: userPhotoUrl != null
+                    ? CircleAvatar(
+                        radius: 13,
+                        backgroundImage: NetworkImage(userPhotoUrl),
+                        backgroundColor: Colors.grey[300],
+                      )
+                    : const Icon(Icons.person_outline_rounded),
+                activeIcon: userPhotoUrl != null
+                    ? Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: Colors.green[700]!, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 13,
+                          backgroundImage: NetworkImage(userPhotoUrl),
+                          backgroundColor: Colors.grey[300],
+                        ),
+                      )
+                    : const Icon(Icons.person_rounded),
                 label: 'Profile',
               ),
             ],

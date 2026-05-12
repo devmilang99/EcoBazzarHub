@@ -28,6 +28,24 @@ class GoogleSignInUseCase {
   }
 }
 
+class GoogleSilentSignInUseCase {
+  final IAuthRepository repository;
+  GoogleSilentSignInUseCase(this.repository);
+
+  Future<UserEntity?> execute() {
+    return repository.signInWithGoogleSilently();
+  }
+}
+
+class GetCurrentUserUseCase {
+  final IAuthRepository repository;
+  GetCurrentUserUseCase(this.repository);
+
+  UserEntity? execute() {
+    return repository.getCurrentUser();
+  }
+}
+
 class ResetPasswordUseCase {
   final IAuthRepository repository;
   ResetPasswordUseCase(this.repository);

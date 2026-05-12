@@ -8,6 +8,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
 import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:eco_bazzar_hub/features/favourites/presentation/screens/favourites_screen.dart';
+import 'package:badges/badges.dart' as badges;
 import '../viewmodels/home_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -68,6 +70,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         (themeMode == ThemeMode.system &&
             MediaQuery.of(context).platformBrightness == Brightness.dark);
 
+    final favouritesCount = homeState.products.where((p) => p.isFavorite).length;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -126,6 +130,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
                     key: ValueKey(isDark),
                     color: isDark ? Colors.amber : Colors.blueGrey,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FavouritesScreen()),
+                  );
+                },
+                icon: badges.Badge(
+                  showBadge: favouritesCount > 0,
+                  badgeContent: Text(
+                    favouritesCount.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                  badgeStyle: const badges.BadgeStyle(badgeColor: Colors.red),
+                  child: Icon(
+                    Icons.favorite_outline_rounded,
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ),
@@ -375,6 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               homeNotifier.toggleFavorite(product.id),
                           onAddToCart: () {
                             ref.read(cartProvider.notifier).addToCart(product);
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('${product.name} added to cart'),
