@@ -27,7 +27,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -49,7 +49,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   height: 120,
                   width: 120,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -80,8 +80,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (val) {
-                    if (val == null || val.isEmpty)
+                    if (val == null || val.isEmpty) {
                       return 'Please enter your email';
+                    }
                     if (!val.contains('@')) return 'Please enter a valid email';
                     return null;
                   },

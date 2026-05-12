@@ -103,13 +103,13 @@ class _ThemeOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary
-                : Colors.grey.withOpacity(0.2),
+                : Colors.grey.withValues(alpha: 0.2),
             width: 2,
           ),
           boxShadow: isSelected
@@ -117,7 +117,7 @@ class _ThemeOption extends StatelessWidget {
                   BoxShadow(
                     color: Theme.of(
                       context,
-                    ).colorScheme.primary.withOpacity(0.2),
+                    ).colorScheme.primary.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

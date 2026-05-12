@@ -126,7 +126,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.8),
+                          Colors.black.withValues(alpha: 0.8),
                           Colors.black,
                         ],
                       ),
@@ -157,7 +157,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         Text(
                               _onboardingData[index].description,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: 18,
                                 height: 1.6,
                               ),
@@ -234,7 +234,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 8,
-                      shadowColor: const Color(0xFF2D6A4F).withOpacity(0.4),
+                      shadowColor: const Color(0xFF2D6A4F).withValues(alpha: 0.4),
                     ),
                     child: Text(
                       _currentPage == _onboardingData.length - 1

@@ -59,8 +59,8 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.6),
-                  const Color(0xFF1B4332).withOpacity(0.9),
+                  Colors.black.withValues(alpha: 0.6),
+                  const Color(0xFF1B4332).withValues(alpha: 0.9),
                   Colors.black,
                 ],
               ),
@@ -90,9 +90,9 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         Container(
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF52B788).withOpacity(0.3)),
+            border: Border.all(color: const Color(0xFF52B788).withValues(alpha: 0.3)),
           ),
           child: const Icon(
             Icons.privacy_tip_rounded,
@@ -117,7 +117,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             height: 1.5,
           ),
         ).animate().fadeIn(delay: 400.ms),
@@ -179,7 +179,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         const SizedBox(height: 16),
         Text(
           'Choose the mode that best fits your style.',
-          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 16),
         ),
         const SizedBox(height: 60),
         Row(
@@ -267,7 +267,7 @@ class _ThemeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 32),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white12),
         ),

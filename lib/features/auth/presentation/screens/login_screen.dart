@@ -50,8 +50,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.4),
-                    Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                    Colors.black.withValues(alpha: 0.4),
+                    Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
                     Theme.of(context).colorScheme.surface,
                   ],
                 ),
@@ -74,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.1),
+                                ).colorScheme.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -242,7 +242,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => ref
                               .read(authViewModelProvider.notifier)
                               .signInWithGoogle(),
-                          child: const Text('Continue with Google'),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 56),
                             shape: RoundedRectangleBorder(
@@ -250,6 +249,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             side: BorderSide(color: Colors.grey.shade300),
                           ),
+                          child: const Text('Continue with Google'),
                         )
                         .animate()
                         .fadeIn(delay: 900.ms)

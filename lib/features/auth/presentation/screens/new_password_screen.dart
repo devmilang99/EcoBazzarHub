@@ -19,7 +19,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,10 +54,12 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   validator: (val) {
-                    if (val == null || val.isEmpty)
+                    if (val == null || val.isEmpty) {
                       return 'Please enter a password';
-                    if (val.length < 6)
+                    }
+                    if (val.length < 6) {
                       return 'Password must be at least 6 characters';
+                    }
                     return null;
                   },
                   decoration: InputDecoration(
@@ -79,8 +81,9 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
                   validator: (val) {
-                    if (val != _passwordController.text)
+                    if (val != _passwordController.text) {
                       return 'Passwords do not match';
+                    }
                     return null;
                   },
                   decoration: InputDecoration(

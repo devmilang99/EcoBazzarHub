@@ -35,7 +35,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundColor: Colors.black.withOpacity(0.3),
+                backgroundColor: Colors.black.withValues(alpha: 0.3),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                   onPressed: () => Navigator.pop(context),
@@ -46,7 +46,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
-                  backgroundColor: Colors.black.withOpacity(0.3),
+                  backgroundColor: Colors.black.withValues(alpha: 0.3),
                   child: IconButton(
                     icon: Icon(
                       widget.product.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -72,8 +72,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withOpacity(0.1),
-                            Colors.black.withOpacity(0.4),
+                            Colors.black.withValues(alpha: 0.1),
+                            Colors.black.withValues(alpha: 0.4),
                           ],
                         ),
                       ),
@@ -101,7 +101,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(

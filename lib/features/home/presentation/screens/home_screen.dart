@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
+import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../viewmodels/home_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -80,13 +82,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             centerTitle: false,
-            title: Text(
-              'EcoBazzar',
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: Colors.green[800],
-              ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.location_on_rounded, size: 14, color: Colors.green[700]),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Kathmandu, Nepal',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: Colors.grey),
+                  ],
+                ),
+                Text(
+                  'EcoBazzar',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.green[800],
+                  ),
+                ),
+              ],
             ),
             actions: [
               IconButton(
@@ -105,13 +127,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     key: ValueKey(isDark),
                     color: isDark ? Colors.amber : Colors.blueGrey,
                   ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.favorite_outline_rounded,
-                  color: Theme.of(context).iconTheme.color,
                 ),
               ),
               IconButton(
@@ -152,7 +167,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        Colors.black.withOpacity(0.6),
+                                        Colors.black.withValues(alpha: 0.6),
                                       ],
                                     ),
                                   ),
@@ -196,64 +211,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // Premium Search Bar Card
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Card(
-                        elevation: 8,
-                        shadowColor: Colors.black.withOpacity(isDark ? 0.4 : 0.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: Container(
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[900] : Colors.white,
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              color: isDark
-                                  ? (Colors.grey[800] ?? Colors.black)
-                                  : (Colors.grey[200] ?? Colors.white),
-                              width: 1,
+                      child: Container(
+                        height: 55,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[900] : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
+                          ],
+                          border: Border.all(
+                            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                            width: 1,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.search_rounded,
-                                color: Colors.green[700],
-                                size: 28,
-                              ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: TextField(
-                                  onTapOutside: (event) {
-                                    FocusScope.of(context).unfocus();
-                                  },
-                                  onChanged: homeNotifier.updateSearchQuery,
-                                  decoration: InputDecoration(
-                                    hintText: 'Search your favorite items...',
-                                    hintStyle: GoogleFonts.outfit(
-                                      color: Colors.grey,
-                                      fontSize: 16,
-                                    ),
-                                    border: InputBorder.none,
-                                    isDense: true,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search_rounded, color: Colors.grey[600], size: 24),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextField(
+                                onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                onChanged: homeNotifier.updateSearchQuery,
+                                decoration: InputDecoration(
+                                  hintText: 'Search for organic products...',
+                                  hintStyle: GoogleFonts.outfit(
+                                    color: Colors.grey[500],
+                                    fontSize: 15,
                                   ),
-                                  style: GoogleFonts.outfit(fontSize: 16),
+                                  border: InputBorder.none,
+                                  isDense: true,
                                 ),
+                                style: GoogleFonts.outfit(fontSize: 15),
                               ),
-                              Container(
-                                width: 1,
-                                height: 25,
-                                color: Colors.grey.withOpacity(0.3),
-                              ),
-                              const SizedBox(width: 15),
-                              Icon(
-                                Icons.tune_rounded,
-                                color: Colors.green[700],
-                                size: 24,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Container(
+                              height: 24,
+                              width: 1,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(Icons.tune_rounded, color: Colors.green[700], size: 22),
+                          ],
                         ),
                       ),
                     ),
@@ -370,6 +373,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           product: product,
                           onFavoriteToggle: () =>
                               homeNotifier.toggleFavorite(product.id),
+                          onAddToCart: () {
+                            ref.read(cartProvider.notifier).addToCart(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${product.name} added to cart'),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                duration: const Duration(seconds: 1),
+                                action: SnackBarAction(
+                                  label: 'View',
+                                  onPressed: () => ref.read(dashboardIndexProvider.notifier).state = 1,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     }, childCount: homeState.filteredProducts.length),
@@ -387,7 +405,13 @@ class _ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback onFavoriteToggle;
 
-  const _ProductCard({required this.product, required this.onFavoriteToggle});
+  final VoidCallback onAddToCart;
+
+  const _ProductCard({
+    required this.product,
+    required this.onFavoriteToggle,
+    required this.onAddToCart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +427,7 @@ class _ProductCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -434,7 +458,7 @@ class _ProductCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -491,16 +515,19 @@ class _ProductCard extends StatelessWidget {
                           color: Colors.green[800],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.add_shopping_cart_rounded,
-                          color: Colors.white,
-                          size: 18,
+                      GestureDetector(
+                        onTap: onAddToCart,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.add_shopping_cart_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ],

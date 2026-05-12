@@ -8,7 +8,6 @@ import 'package:eco_bazzar_hub/features/auth/presentation/screens/forgot_passwor
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/otp_screen.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/new_password_screen.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/onboarding_screen.dart';
-import 'package:eco_bazzar_hub/features/home/presentation/screens/home_screen.dart';
 import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
 
 final appRouter = GoRouter(
