@@ -9,14 +9,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:badges/badges.dart' as badges;
 
-
 final dashboardIndexProvider = StateProvider<int>((ref) => 0);
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      debugPrint('App went to background');
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      debugPrint('App resumed from background');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedIndex = ref.watch(dashboardIndexProvider);
     final cartItemsCount = ref.watch(cartProvider).items.length;
     final authState = ref.watch(authViewModelProvider);
@@ -34,97 +63,109 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: IndexedStack(index: selectedIndex, children: screens),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BottomNavigationBar(
-            currentIndex: selectedIndex,
-            onTap: (index) =>
-                ref.read(dashboardIndexProvider.notifier).state = index,
-            backgroundColor: Colors.transparent,
-            selectedItemColor: Colors.green[700],
-            unselectedItemColor: isDark ? Colors.grey[600] : Colors.grey[400],
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            elevation: 0,
-            type: BottomNavigationBarType.fixed,
-            selectedLabelStyle: GoogleFonts.outfit(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-            unselectedLabelStyle: GoogleFonts.outfit(
-              fontWeight: FontWeight.normal,
-              fontSize: 11,
-            ),
-            items: [
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: badges.Badge(
-                  showBadge: cartItemsCount > 0,
-                  badgeContent: Text(
-                    cartItemsCount.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                  badgeStyle: const badges.BadgeStyle(badgeColor: Colors.green),
-                  child: const Icon(Icons.shopping_cart_outlined),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
-                activeIcon: badges.Badge(
-                  showBadge: cartItemsCount > 0,
-                  badgeContent: Text(
-                    cartItemsCount.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                  badgeStyle: const badges.BadgeStyle(badgeColor: Colors.green),
-                  child: const Icon(Icons.shopping_cart_rounded),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: BottomNavigationBar(
+              currentIndex: selectedIndex,
+              onTap:
+                  (index) =>
+                      ref.read(dashboardIndexProvider.notifier).state = index,
+              backgroundColor: Colors.transparent,
+              selectedItemColor: Colors.green[700],
+              unselectedItemColor: isDark ? Colors.grey[500] : Colors.grey[500],
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              unselectedLabelStyle: GoogleFonts.outfit(
+                fontWeight: FontWeight.normal,
+                fontSize: 11,
+              ),
+              items: [
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
                 ),
-                label: 'Cart',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.history_outlined),
-                activeIcon: Icon(Icons.history_rounded),
-                label: 'Orders',
-              ),
-              BottomNavigationBarItem(
-                icon: userPhotoUrl != null
-                    ? CircleAvatar(
-                        radius: 13,
-                        backgroundImage: NetworkImage(userPhotoUrl),
-                        backgroundColor: Colors.grey[300],
-                      )
-                    : const Icon(Icons.person_outline_rounded),
-                activeIcon: userPhotoUrl != null
-                    ? Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              color: Colors.green[700]!, width: 2),
-                        ),
-                        child: CircleAvatar(
-                          radius: 13,
-                          backgroundImage: NetworkImage(userPhotoUrl),
-                          backgroundColor: Colors.grey[300],
-                        ),
-                      )
-                    : const Icon(Icons.person_rounded),
-                label: 'Profile',
-              ),
-            ],
+                BottomNavigationBarItem(
+                  icon: badges.Badge(
+                    showBadge: cartItemsCount > 0,
+                    badgeContent: Text(
+                      cartItemsCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    badgeStyle: const badges.BadgeStyle(
+                      badgeColor: Colors.green,
+                    ),
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  activeIcon: badges.Badge(
+                    showBadge: cartItemsCount > 0,
+                    badgeContent: Text(
+                      cartItemsCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    badgeStyle: const badges.BadgeStyle(
+                      badgeColor: Colors.green,
+                    ),
+                    child: const Icon(Icons.shopping_cart_rounded),
+                  ),
+                  label: 'Cart',
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.history_outlined),
+                  activeIcon: Icon(Icons.history_rounded),
+                  label: 'Orders',
+                ),
+                BottomNavigationBarItem(
+                  icon:
+                      userPhotoUrl != null
+                          ? CircleAvatar(
+                            radius: 13,
+                            backgroundImage: NetworkImage(userPhotoUrl),
+                            backgroundColor: Colors.grey[300],
+                          )
+                          : const Icon(Icons.person_outline_rounded),
+                  activeIcon:
+                      userPhotoUrl != null
+                          ? Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.green[700]!,
+                                width: 2,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 13,
+                              backgroundImage: NetworkImage(userPhotoUrl),
+                              backgroundColor: Colors.grey[300],
+                            ),
+                          )
+                          : const Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
+            ),
           ),
         ),
       ),

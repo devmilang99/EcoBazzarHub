@@ -7,8 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
-import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart'
+    as dashboard;
+import 'package:eco_bazzar_hub/features/core/presentation/screens/location_selector_screen.dart';
 import 'package:eco_bazzar_hub/features/favourites/presentation/screens/favourites_screen.dart';
+import 'package:eco_bazzar_hub/features/notifications/presentation/screens/notification_screen.dart';
 import 'package:badges/badges.dart' as badges;
 import '../viewmodels/home_viewmodel.dart';
 
@@ -60,6 +63,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  void _showLocationPicker(BuildContext context) async {
+    final selected = await LocationSelectorSheet.show(context, 'Kathmandu, Nepal');
+    if (selected != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Location updated to $selected'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.green[700],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeViewModelProvider);
@@ -70,7 +87,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         (themeMode == ThemeMode.system &&
             MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-    final favouritesCount = homeState.products.where((p) => p.isFavorite).length;
+    final favouritesCount = homeState.products
+        .where((p) => p.isFavorite)
+        .length;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -89,20 +108,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.location_on_rounded, size: 14, color: Colors.green[700]),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Kathmandu, Nepal',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+                GestureDetector(
+                  onTap: () => _showLocationPicker(context),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_rounded,
+                        size: 14,
+                        color: Colors.green[700],
                       ),
-                    ),
-                    Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: Colors.grey),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        'Kathmandu, Nepal',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
                 ),
                 Text(
                   'EcoBazzar',
@@ -137,7 +167,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const FavouritesScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const FavouritesScreen(),
+                    ),
                   );
                 },
                 icon: badges.Badge(
@@ -154,7 +186,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationScreen(),
+                    ),
+                  );
+                },
                 icon: Icon(
                   Icons.notifications_none_rounded,
                   color: Theme.of(context).iconTheme.color,
@@ -236,33 +275,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Container(
-                        height: 55,
+                        height: 60,
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[900] : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          color: isDark ? Colors.grey[950] : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                           border: Border.all(
-                            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                            color: isDark
+                                ? Colors.grey[800]!
+                                : Colors.grey[200]!,
                             width: 1,
                           ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: Row(
                           children: [
-                            Icon(Icons.search_rounded, color: Colors.grey[600], size: 24),
-                            const SizedBox(width: 12),
+                            Container(
+                              height: 42,
+                              width: 42,
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                Icons.search_rounded,
+                                color: Colors.green[700],
+                              ),
+                            ),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: TextField(
-                                onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                                onTapOutside: (event) =>
+                                    FocusScope.of(context).unfocus(),
                                 onChanged: homeNotifier.updateSearchQuery,
+                                cursorColor: Colors.green[700],
                                 decoration: InputDecoration(
-                                  hintText: 'Search for organic products...',
+                                  hintText: 'Search sustainable essentials',
                                   hintStyle: GoogleFonts.outfit(
                                     color: Colors.grey[500],
                                     fontSize: 15,
@@ -270,18 +324,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   border: InputBorder.none,
                                   isDense: true,
                                 ),
-                                style: GoogleFonts.outfit(fontSize: 15),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
-                            Container(
-                              height: 24,
-                              width: 1,
-                              color: Colors.grey[300],
+                            const SizedBox(width: 10),
+                            TextButton.icon(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                backgroundColor: Colors.green[700],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.tune_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              label: Text(
+                                'Filters',
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 12),
-                            Icon(Icons.tune_rounded, color: Colors.green[700], size: 22),
                           ],
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          _SearchChip(label: 'Organic'),
+                          const SizedBox(width: 10),
+                          _SearchChip(label: 'Fair Trade'),
+                          const SizedBox(width: 10),
+                          _SearchChip(label: 'New Arrival'),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -404,11 +494,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               SnackBar(
                                 content: Text('${product.name} added to cart'),
                                 behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                                 duration: const Duration(seconds: 1),
                                 action: SnackBarAction(
                                   label: 'View',
-                                  onPressed: () => ref.read(dashboardIndexProvider.notifier).state = 1,
+                                  onPressed: () =>
+                                      ref
+                                              .read(
+                                                dashboard
+                                                    .dashboardIndexProvider
+                                                    .notifier,
+                                              )
+                                              .state =
+                                          1,
                                 ),
                               ),
                             );
@@ -502,7 +602,7 @@ class _ProductCard extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Padding(
-              padding: const EdgeInsets.all(14.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -564,5 +664,30 @@ class _ProductCard extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
+  }
+}
+
+class _SearchChip extends StatelessWidget {
+  final String label;
+  const _SearchChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : Colors.green[50],
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.outfit(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white : Colors.green[800],
+        ),
+      ),
+    );
   }
 }

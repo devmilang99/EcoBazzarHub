@@ -23,18 +23,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadSavedEmail();
-    ref.listen<AuthState>(authViewModelProvider, (previous, next) {
-      if (next.user != null) {
-        if (mounted) context.go('/home');
-      }
-      if (next.error != null && next.error != previous?.error) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(next.error!)));
-        }
-      }
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _attemptAutoLogin();
     });
@@ -75,6 +63,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authViewModelProvider, (previous, next) {
+      if (next.user != null) {
+        if (mounted) context.go('/home');
+      }
+      if (next.error != null && next.error != previous?.error) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(next.error!)));
+        }
+      }
+    });
     final authState = ref.watch(authViewModelProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -98,10 +98,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withOpacity(0.45),
                     Theme.of(
                       context,
-                    ).colorScheme.surface.withValues(alpha: 0.92),
+                    ).colorScheme.surface.withOpacity(0.92),
                     Theme.of(context).colorScheme.surface,
                   ],
                 ),
@@ -122,7 +122,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withValues(alpha: 0.14),
+                      ).colorScheme.primary.withOpacity(0.14),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -161,7 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Login Card
                   Card(
                     elevation: 12,
-                    shadowColor: Colors.black.withValues(alpha: 0.12),
+                    shadowColor: Colors.black.withOpacity(0.12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),

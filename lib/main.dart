@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers.dart';
 
@@ -34,6 +33,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       title: 'EcoBazzar Hub',
@@ -41,7 +41,7 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

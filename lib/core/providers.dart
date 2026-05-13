@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/network/dio_client.dart';
 import '../core/database/app_database.dart';
+import '../core/router/app_router.dart';
 
 final dioProvider = Provider((ref) => DioClient().dio);
 
@@ -27,3 +28,5 @@ final isFirstTimeProvider = StateProvider<bool>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return prefs.getBool('is_first_time') ?? true;
 });
+
+final routerProvider = Provider((ref) => appRouter);

@@ -21,33 +21,44 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
     );
     state = [order, ...state];
 
-    // Tick every second so the live countdown updates in UI
+    // Master timer to tick every second for UI updates and status progression
     _tickTimers[order.id] = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;
       }
-      // Rebuild state to force UI refresh
-      state = [...state];
-      if (order.cancelSecondsLeft <= 0) t.cancel();
-    });
 
-    // After 20 seconds advance status to packing (if not cancelled)
-    _advanceTimers[order.id] = Timer(const Duration(seconds: 20), () {
-      if (!mounted) return;
+      final elapsed = DateTime.now().difference(order.placedAt).inSeconds;
+      
+      // Advance status based on elapsed time (mock 50s cycle)
+      OrderStatus newStatus = order.status;
+      if (elapsed >= 50) {
+        newStatus = OrderStatus.delivered;
+        t.cancel(); // Stop ticking once delivered
+      } else if (elapsed >= 37) {
+        newStatus = OrderStatus.outForDelivery;
+      } else if (elapsed >= 25) {
+        newStatus = OrderStatus.sentToSeller;
+      } else if (elapsed >= 12) {
+        newStatus = OrderStatus.packing;
+      }
+
+      // Update state if status changed or just to force UI refresh (for animations)
       state = state.map((o) {
-        if (o.id == order.id && o.status == OrderStatus.pending) {
-          return o.copyWith(status: OrderStatus.packing);
+        if (o.id == order.id) {
+          if (o.status == OrderStatus.cancelled) {
+            t.cancel();
+            return o;
+          }
+          return o.copyWith(status: newStatus);
         }
         return o;
       }).toList();
-      _tickTimers[order.id]?.cancel();
     });
   }
 
   void cancelOrder(String orderId) {
     _tickTimers[orderId]?.cancel();
-    _advanceTimers[orderId]?.cancel();
     state = state.map((order) {
       if (order.id == orderId && order.canCancel) {
         return order.copyWith(

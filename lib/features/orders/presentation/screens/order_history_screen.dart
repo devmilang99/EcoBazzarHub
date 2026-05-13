@@ -237,7 +237,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPending = order.status == OrderStatus.pending;
     final secondsLeft = order.cancelSecondsLeft;
-    final progress = secondsLeft / 20.0;
+    final progress = secondsLeft / 10.0; // Updated to 10s
+    final elapsed = DateTime.now().difference(order.placedAt).inSeconds;
+    final cycleProgress = math.min(elapsed / 50.0, 1.0); // 50s mock cycle
 
     // Dynamic accent color based on status
     final statusColor = _statusColor(order.status);
@@ -332,8 +334,10 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                   ),
                 ),
 
-                // Progress bar (for non-pending active orders)
-                if (widget.isRecent && !isPending) ...[
+                // Mock 50s Cycle Progress Bar
+                if (widget.isRecent) ...[
+                  const SizedBox(height: 20),
+                  _buildCycleProgressBar(cycleProgress, order.status, isDark),
                   const SizedBox(height: 16),
                   _buildProgressBar(order.status, isDark),
                 ],
@@ -411,6 +415,70 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
         _buildStepLine(step >= 4),
         _buildStepIcon(
             Icons.check_circle_outline_rounded, step >= 4, 'Done'),
+      ],
+    );
+  }
+
+  Widget _buildCycleProgressBar(double progress, OrderStatus status, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Delivery Progress',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            Text(
+              '${(progress * 100).toInt()}%',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 10,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : Colors.grey[200],
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Stack(
+            children: [
+              FractionallySizedBox(
+                widthFactor: progress,
+                child: AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.green[400]!, Colors.green[700]!],
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withValues(alpha: 0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ).animate(onPlay: (c) => c.repeat()).shimmer(
+                      duration: 2000.ms,
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

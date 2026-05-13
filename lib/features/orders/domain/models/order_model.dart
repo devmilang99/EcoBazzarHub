@@ -13,7 +13,7 @@ class OrderModel extends Equatable {
   /// The exact moment the order was placed — used for the 20s cancellation window.
   final DateTime placedAt;
 
-  OrderModel({
+  const OrderModel({
     required this.id,
     required this.items,
     required this.totalAmount,
@@ -46,7 +46,7 @@ class OrderModel extends Equatable {
   /// Seconds remaining in the cancellation window (0 when expired).
   int get cancelSecondsLeft {
     final elapsed = DateTime.now().difference(placedAt).inSeconds;
-    final remaining = 20 - elapsed;
+    final remaining = 10 - elapsed;
     return remaining < 0 ? 0 : remaining;
   }
 

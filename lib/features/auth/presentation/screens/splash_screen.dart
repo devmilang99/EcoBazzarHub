@@ -75,8 +75,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: 0.3),
-                  const Color(0xFF2D6A4F).withValues(alpha: 0.85),
+                  Colors.black.withOpacity(0.3),
+                  const Color(0xFF2D6A4F).withOpacity(0.85),
                 ],
               ),
             ),
@@ -92,7 +92,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withOpacity(0.2),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
