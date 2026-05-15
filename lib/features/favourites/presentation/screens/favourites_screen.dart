@@ -171,7 +171,7 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
                                     child: Hero(
                                       tag: 'product_${product.id}',
                                       child: Image.network(
-                                        product.image,
+                                        product.productImageUrl,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -222,7 +222,7 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          '\$${product.price}',
+                                          'Rs. ${product.price}',
                                           style: GoogleFonts.outfit(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 15,

@@ -450,20 +450,20 @@ class CartScreen extends ConsumerWidget {
                               children: [
                                 _buildCompactPriceRow(
                                   'Subtotal',
-                                  '\$${state.subtotal.toStringAsFixed(2)}',
+                                  'Rs. ${state.subtotal.toStringAsFixed(2)}',
                                   isDark,
                                 ),
                                 const SizedBox(height: 4),
                                 _buildCompactPriceRow(
                                   'Tax (5%)',
-                                  '\$${state.taxAmount.toStringAsFixed(2)}',
+                                  'Rs. ${state.taxAmount.toStringAsFixed(2)}',
                                   isDark,
                                 ),
                                 if (state.discountAmount > 0) ...[
                                   const SizedBox(height: 4),
                                   _buildCompactPriceRow(
                                     'Discount',
-                                    '-\$${state.discountAmount.toStringAsFixed(2)}',
+                                    '-Rs. ${state.discountAmount.toStringAsFixed(2)}',
                                     isDark,
                                     isDiscount: true,
                                   ),
@@ -548,7 +548,7 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '\$${state.total.toStringAsFixed(2)}',
+                  'Rs. ${state.total.toStringAsFixed(2)}',
                   style: GoogleFonts.outfit(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -761,7 +761,7 @@ class CartScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _buildDialogDetailRow('Payment', paymentMethod, isDark),
                         const SizedBox(height: 8),
-                        _buildDialogDetailRow('Total Amount', '\$${total.toStringAsFixed(2)}', isDark, isTotal: true),
+                        _buildDialogDetailRow('Total Amount', 'Rs. ${total.toStringAsFixed(2)}', isDark, isTotal: true),
                         const SizedBox(height: 32),
                         Row(
                           children: [
@@ -790,7 +790,13 @@ class CartScreen extends ConsumerWidget {
                                 onPressed: () {
                                   ref
                                       .read(orderProvider.notifier)
-                                      .placeOrder(selectedItems, total);
+                                      .placeOrder(
+                                        selectedItems,
+                                        total,
+                                        ref.read(cartProvider).subtotal,
+                                        ref.read(cartProvider).taxAmount,
+                                        ref.read(cartProvider).discountAmount,
+                                      );
                                   notifier.clearSelectedItems();
                                   Navigator.pop(context);
                                   _showOrderSuccessDialog(context, ref);
@@ -984,7 +990,7 @@ class _CartItemTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '\$${item.product.price}',
+                      'Rs. ${item.product.price}',
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.bold,
                         color: Colors.green[700],

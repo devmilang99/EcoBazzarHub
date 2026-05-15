@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final sharedPrefs = await SharedPreferences.getInstance();
 
   // Initialize Firebase (Try-catch for cases where configuration is missing)
   try {
@@ -20,9 +17,8 @@ void main() async {
   }
 
   runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(sharedPrefs)],
-      child: const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }

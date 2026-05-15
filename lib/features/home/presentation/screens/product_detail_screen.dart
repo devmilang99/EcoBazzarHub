@@ -23,11 +23,9 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int _quantity = 1;
   bool _showAllReviews = false;
-  String _selectedPaymentMethod = 'Credit Card';
 
   static const String sellerName = 'Eco Store';
   static const String sellerLocation = 'Kathmandu, Nepal';
-  static const double sellerRating = 4.9;
 
   static const List<_CustomerReview> _reviews = [
     _CustomerReview(
@@ -83,425 +81,586 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Unique Animated Header with Hero
-          SliverAppBar(
-            expandedHeight: 400,
-            pinned: true,
-            stretch: true,
-            backgroundColor: Colors.transparent,
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.black.withValues(alpha: 0.3),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.black.withValues(alpha: 0.3),
-                  child: IconButton(
-                    icon: Icon(
-                      widget.product.isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: widget.product.isFavorite
-                          ? Colors.red
-                          : Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () =>
-                        homeNotifier.toggleFavorite(widget.product.id),
-                  ),
-                ),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const [StretchMode.zoomBackground],
-              background: Hero(
-                tag: 'product_${widget.product.id}',
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(widget.product.image, fit: BoxFit.cover),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.1),
-                            Colors.black.withValues(alpha: 0.4),
-                          ],
-                        ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              // Premium Glass Header
+              SliverAppBar(
+                expandedHeight: 450,
+                pinned: true,
+                stretch: true,
+                backgroundColor: isDark ? Colors.black : Colors.white,
+                elevation: 0,
+                leading: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: BackdropFilter(
+                      filter: ColorFilter.mode(
+                        Colors.black.withValues(alpha: 0.2),
+                        BlendMode.srcOver,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(40),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Company & ID Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'EcoBazzar Premium',
-                          style: GoogleFonts.outfit(
-                            color: Colors.green[800],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 18,
                           ),
-                        ),
-                      ).animate().fadeIn().slideX(),
-                      Text(
-                        'ID: #${widget.product.id.padLeft(6, '0')}',
-                        style: GoogleFonts.outfit(
-                          color: Colors.grey,
-                          fontSize: 12,
-                          letterSpacing: 1,
+                          onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Product Name
-                  Text(
-                    widget.product.name,
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 8),
-
-                  // Price and Rating
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$${widget.product.price}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[800],
+                  ),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: BackdropFilter(
+                        filter: ColorFilter.mode(
+                          Colors.black.withValues(alpha: 0.2),
+                          BlendMode.srcOver,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            color: Colors.amber,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '4.8 (120 Reviews)',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey,
+                        child: Container(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          child: IconButton(
+                            icon: Icon(
+                              ref.watch(homeViewModelProvider.select((s) => s.products.firstWhere((p) => p.id == widget.product.id, orElse: () => widget.product))).isFavorite
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              color: ref.watch(homeViewModelProvider.select((s) => s.products.firstWhere((p) => p.id == widget.product.id, orElse: () => widget.product))).isFavorite
+                                  ? Colors.red
+                                  : Colors.white,
+                              size: 20,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ).animate().fadeIn(delay: 200.ms),
-                  const SizedBox(height: 24),
-
-                  // Short Description
-                  Text(
-                    'Description',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.product.description,
-                    style: GoogleFonts.outfit(color: Colors.grey, height: 1.6),
-                  ).animate().fadeIn(delay: 300.ms),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      _FeatureBadge(label: 'Eco-certified'),
-                      _FeatureBadge(label: 'Fast shipping'),
-                      _FeatureBadge(label: 'Organic ingredients'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[900] : Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 27,
-                          backgroundColor: Colors.green[50],
-                          child: const Icon(
-                            Icons.storefront_rounded,
-                            color: Colors.green,
+                            onPressed: () =>
+                                homeNotifier.toggleFavorite(widget.product.id),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                sellerName,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                sellerLocation,
-                                style: GoogleFonts.outfit(
-                                  color: Colors.grey,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star_rounded,
-                                    size: 16,
-                                    color: Colors.amber,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '$sellerRating seller rating',
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.grey[600],
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                      ),
+                    ),
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const [StretchMode.zoomBackground],
+                  background: Hero(
+                    tag: 'product_${widget.product.id}',
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(widget.product.image, fit: BoxFit.cover),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withValues(alpha: 0.2),
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.4),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 30),
-                  Text(
-                    'Customer Reviews',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(40),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Column(
-                    children: displayedReviews
-                        .map((review) => _ReviewCard(review: review))
-                        .toList(),
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () =>
-                          setState(() => _showAllReviews = !_showAllReviews),
-                      child: Text(
-                        _showAllReviews ? 'Show less' : 'See all',
-                        style: GoogleFonts.outfit(
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Quantity Selector
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Badge and Category
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.green.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.verified_rounded,
+                                  size: 14,
+                                  color: Colors.green,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Premium Seller',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.green[800],
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'ID: #${widget.product.id.padLeft(6, '0')}',
+                            style: GoogleFonts.outfit(
+                              color: Colors.grey,
+                              fontSize: 12,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Product Title
                       Text(
-                        'Quantity',
+                            widget.product.name,
+                            style: GoogleFonts.outfit(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(delay: 100.ms)
+                          .slideY(begin: 0.1, end: 0),
+                      const SizedBox(height: 12),
+
+                      // Price & Rating Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Rs. ${widget.product.price}',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFF2D6A4F),
+                                ),
+                              ),
+                              Text(
+                                'Inclusive of all taxes',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.grey[900]
+                                  : Colors.grey[50],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isDark ? Colors.white10 : Colors.black12,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.amber,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '4.8',
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      '120 Reviews',
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.grey,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ).animate().fadeIn(delay: 200.ms),
+
+                      const SizedBox(height: 24),
+
+                      // Quantity Selector (Moved here for better UX)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Quantity',
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.grey[900]
+                                  : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                _QuantityButton(
+                                  icon: Icons.remove_rounded,
+                                  onPressed: () => setState(
+                                    () => _quantity = _quantity > 1
+                                        ? _quantity - 1
+                                        : 1,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    '$_quantity',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                _QuantityButton(
+                                  icon: Icons.add_rounded,
+                                  onPressed: () => setState(() => _quantity++),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Description
+                      Text(
+                        'About Product',
                         style: GoogleFonts.outfit(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        widget.product.description,
+                        style: GoogleFonts.outfit(
+                          color: isDark ? Colors.grey[400] : Colors.grey[700],
+                          height: 1.6,
+                          fontSize: 15,
+                        ),
+                      ).animate().fadeIn(delay: 300.ms),
+                      const SizedBox(height: 24),
+
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          _FeatureBadge(
+                            label: 'Eco-certified',
+                            icon: Icons.eco_outlined,
+                          ),
+                          _FeatureBadge(
+                            label: 'Fast shipping',
+                            icon: Icons.bolt_outlined,
+                          ),
+                          _FeatureBadge(
+                            label: 'Organic',
+                            icon: Icons.grass_outlined,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Seller Card
                       Container(
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[900] : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(15),
+                          color: isDark ? Colors.grey[900] : Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: isDark ? Colors.white10 : Colors.grey[200]!,
+                          ),
                         ),
                         child: Row(
                           children: [
-                            IconButton(
-                              onPressed: () => setState(
-                                () => _quantity = _quantity > 1
-                                    ? _quantity - 1
-                                    : 1,
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
                               ),
-                              icon: const Icon(Icons.remove_rounded),
-                            ),
-                            Text(
-                              '$_quantity',
-                              style: GoogleFonts.outfit(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                              child: const Icon(
+                                Icons.storefront_rounded,
+                                color: Colors.green,
+                                size: 28,
                               ),
                             ),
-                            IconButton(
-                              onPressed: () => setState(() => _quantity++),
-                              icon: const Icon(Icons.add_rounded),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    sellerName,
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  Text(
+                                    sellerLocation,
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            OutlinedButton(
+                              onPressed: () {},
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.green,
+                                side: const BorderSide(color: Colors.green),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                              ),
+                              child: Text(
+                                'Visit Store',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ).animate().fadeIn(delay: 400.ms),
 
-                  const SizedBox(height: 40),
-                  Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[850] : Colors.grey[100],
+                      const SizedBox(height: 32),
+
+                      // Reviews Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Customer Reviews',
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(
+                              () => _showAllReviews = !_showAllReviews,
+                            ),
+                            child: Text(
+                              _showAllReviews ? 'Show Less' : 'See All',
+                              style: GoogleFonts.outfit(
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: displayedReviews
+                            .map((review) => _ReviewCard(review: review))
+                            .toList(),
+                      ),
+
+
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Sticky Bottom Actions
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                16,
+                24,
+                MediaQuery.of(context).padding.bottom + 16,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black : Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 30,
+                    offset: const Offset(0, -10),
+                  ),
+                ],
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        for (int i = 0; i < _quantity; i++) {
+                          ref
+                              .read(cartProvider.notifier)
+                              .addToCart(widget.product);
+                        }
+                        _showSuccessSnackBar();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[100],
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.favorite_border_rounded,
-                            color: Colors.green,
-                          ),
-                        ),
+                        elevation: 0,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            for (int i = 0; i < _quantity; i++) {
-                              ref
-                                  .read(cartProvider.notifier)
-                                  .addToCart(widget.product);
-                            }
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${_quantity}x ${widget.product.name} added to cart',
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                duration: const Duration(seconds: 1),
-                                action: SnackBarAction(
-                                  label: 'View',
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    ref
-                                            .read(
-                                              dashboard
-                                                  .dashboardIndexProvider
-                                                  .notifier,
-                                            )
-                                            .state =
-                                        1;
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[700],
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.shopping_bag_outlined, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
                             'Add to Cart',
                             style: GoogleFonts.outfit(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => _showCheckoutSheet(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Buy Now',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _showCheckoutSheet(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2D6A4F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
+                        elevation: 8,
+                        shadowColor: const Color(
+                          0xFF2D6A4F,
+                        ).withValues(alpha: 0.4),
                       ),
-                    ],
-                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 40),
+                      child: Text(
+                        'Buy Now',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
-              ),
+              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${_quantity}x ${widget.product.name} added to cart'),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xFF2D6A4F),
+        action: SnackBarAction(
+          label: 'View',
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+            ref.read(dashboard.dashboardIndexProvider.notifier).state = 1;
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _QuantityButton({required this.icon, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Icon(icon, size: 24),
+        ),
       ),
     );
   }
@@ -509,7 +668,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
 class _FeatureBadge extends StatelessWidget {
   final String label;
-  const _FeatureBadge({required this.label});
+  final IconData icon;
+
+  const _FeatureBadge({required this.label, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -517,16 +678,30 @@ class _FeatureBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : Colors.green[50],
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.green[50],
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.outfit(
-          color: isDark ? Colors.white : Colors.green[800],
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.green.withValues(alpha: 0.1),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isDark ? Colors.green[400] : Colors.green[800],
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: isDark ? Colors.white : Colors.green[800],
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -554,10 +729,9 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
 
   double get subtotal => widget.product.price * widget.quantity;
   double get tax => subtotal * 0.05;
-  double get discount =>
-      _selectedVoucher == 'ECO20'
-          ? subtotal * 0.2
-          : (_selectedVoucher == 'WELCOME10' ? subtotal * 0.1 : 0);
+  double get discount => _selectedVoucher == 'ECO20'
+      ? subtotal * 0.2
+      : (_selectedVoucher == 'WELCOME10' ? subtotal * 0.1 : 0);
   double get total => subtotal + tax - discount;
 
   @override
@@ -592,7 +766,10 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
           const SizedBox(height: 24),
           Text(
             'Order Summary',
-            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -623,11 +800,14 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
                     const SizedBox(height: 4),
                     Text(
                       'Quantity: ${widget.quantity} · Seller: ${widget.sellerName}',
-                      style: GoogleFonts.outfit(color: Colors.grey, fontSize: 13),
+                      style: GoogleFonts.outfit(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '\$${widget.product.price}',
+                      'Rs. ${widget.product.price}',
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.bold,
                         color: Colors.green[700],
@@ -643,7 +823,10 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
           // Voucher Section
           Text(
             'Voucher',
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -685,7 +868,10 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
           // Payment Method
           Text(
             'Payment Method',
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -694,26 +880,24 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
                 label: 'Cash',
                 icon: Icons.money,
                 isSelected: _selectedPaymentMethod == 'Cash on Delivery',
-                onTap:
-                    () => setState(
-                      () => _selectedPaymentMethod = 'Cash on Delivery',
-                    ),
+                onTap: () =>
+                    setState(() => _selectedPaymentMethod = 'Cash on Delivery'),
               ),
               const SizedBox(width: 12),
               _PaymentMethodButton(
                 label: 'Card',
                 icon: Icons.credit_card,
                 isSelected: _selectedPaymentMethod == 'Credit Card',
-                onTap:
-                    () => setState(() => _selectedPaymentMethod = 'Credit Card'),
+                onTap: () =>
+                    setState(() => _selectedPaymentMethod = 'Credit Card'),
               ),
               const SizedBox(width: 12),
               _PaymentMethodButton(
                 label: 'Pay',
                 icon: Icons.payment,
                 isSelected: _selectedPaymentMethod == 'Google Pay',
-                onTap:
-                    () => setState(() => _selectedPaymentMethod = 'Google Pay'),
+                onTap: () =>
+                    setState(() => _selectedPaymentMethod = 'Google Pay'),
               ),
             ],
           ),
@@ -758,7 +942,7 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
                   quantity: widget.quantity,
                   sellerName: widget.sellerName,
                 ),
-              ], total);
+              ], total, subtotal, tax, discount);
 
               Navigator.pop(context); // Close sheet
               Navigator.pop(context); // Go back to home
@@ -788,7 +972,10 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
             ),
             child: Text(
               'Confirm Order',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
         ],
@@ -820,16 +1007,14 @@ class _PaymentMethodButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? Colors.green
-                    : (isDark ? Colors.grey[900] : Colors.white),
+            color: isSelected
+                ? Colors.green
+                : (isDark ? Colors.grey[900] : Colors.white),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color:
-                  isSelected
-                      ? Colors.green
-                      : (isDark ? Colors.grey[800]! : Colors.grey[300]!),
+              color: isSelected
+                  ? Colors.green
+                  : (isDark ? Colors.grey[800]! : Colors.grey[300]!),
             ),
           ),
           child: Column(
@@ -837,10 +1022,9 @@ class _PaymentMethodButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color:
-                    isSelected
-                        ? Colors.white
-                        : (isDark ? Colors.white : Colors.black87),
+                color: isSelected
+                    ? Colors.white
+                    : (isDark ? Colors.white : Colors.black87),
               ),
               const SizedBox(height: 4),
               Text(
@@ -848,10 +1032,9 @@ class _PaymentMethodButton extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color:
-                      isSelected
-                          ? Colors.white
-                          : (isDark ? Colors.grey : Colors.black54),
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? Colors.grey : Colors.black54),
                 ),
               ),
             ],
@@ -889,14 +1072,13 @@ class _CalculationRow extends StatelessWidget {
           ),
         ),
         Text(
-          '${value < 0 ? '-' : ''}\$${value.abs().toStringAsFixed(2)}',
+          '${value < 0 ? '-' : ''}Rs. ${value.abs().toStringAsFixed(2)}',
           style: GoogleFonts.outfit(
             fontSize: isTotal ? 18 : 14,
             fontWeight: FontWeight.bold,
-            color:
-                isTotal
-                    ? Colors.green[800]
-                    : (isDiscount ? Colors.red : Colors.black87),
+            color: isTotal
+                ? Colors.green[800]
+                : (isDiscount ? Colors.red : Colors.black87),
           ),
         ),
       ],

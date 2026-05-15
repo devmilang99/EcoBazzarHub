@@ -158,12 +158,12 @@ class _NotificationTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: notification.isRead
             ? (isDark ? Colors.grey[900] : Colors.white)
-            : (isDark ? Colors.green.withOpacity(0.1) : Colors.green[50]),
+            : (isDark ? Colors.green.withValues(alpha: 0.1) : Colors.green[50]),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: notification.isRead
               ? (isDark ? Colors.grey[800]! : Colors.grey[200]!)
-              : Colors.green.withOpacity(0.3),
+              : Colors.green.withValues(alpha: 0.3),
         ),
       ),
       child: ListTile(
@@ -171,7 +171,7 @@ class _NotificationTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: notification.iconBgColor.withOpacity(0.15),
+            color: notification.iconBgColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(

@@ -28,19 +28,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
   }
 
-  void _loadSavedEmail() {
-    final prefs = ref.read(sharedPreferencesProvider);
-    _rememberMe = prefs.getBool('remember_me') ?? false;
-    _emailController.text = prefs.getString('remembered_email') ?? '';
+  Future<void> _loadSavedEmail() async {
+    final db = ref.read(databaseProvider);
+    final rememberMeVal = await db.getSetting('remember_me');
+    final emailVal = await db.getSetting('remembered_email');
+    
+    if (mounted) {
+      setState(() {
+        _rememberMe = rememberMeVal == 'true';
+        _emailController.text = emailVal ?? '';
+      });
+    }
   }
 
-  void _saveRememberedEmail() {
-    final prefs = ref.read(sharedPreferencesProvider);
-    prefs.setBool('remember_me', _rememberMe);
+  Future<void> _saveRememberedEmail() async {
+    final db = ref.read(databaseProvider);
+    await db.saveSetting('remember_me', _rememberMe.toString());
     if (_rememberMe) {
-      prefs.setString('remembered_email', _emailController.text.trim());
+      await db.saveSetting('remembered_email', _emailController.text.trim());
     } else {
-      prefs.remove('remembered_email');
+      // In setting table, we can just save empty or use a dedicated delete method
+      await db.saveSetting('remembered_email', '');
     }
   }
 
@@ -98,10 +106,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.45),
+                    Colors.black.withValues(alpha: 0.45),
                     Theme.of(
                       context,
-                    ).colorScheme.surface.withOpacity(0.92),
+                    ).colorScheme.surface.withValues(alpha: 0.92),
                     Theme.of(context).colorScheme.surface,
                   ],
                 ),
@@ -122,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withOpacity(0.14),
+                      ).colorScheme.primary.withValues(alpha: 0.14),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -161,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Login Card
                   Card(
                     elevation: 12,
-                    shadowColor: Colors.black.withOpacity(0.12),
+                    shadowColor: Colors.black.withValues(alpha: 0.12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),
@@ -311,10 +319,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ElevatedButton(
                               onPressed: authState.isLoading
                                   ? null
-                                  : () {
+                                  : () async {
                                       if (_formKey.currentState?.validate() ??
                                           false) {
-                                        _saveRememberedEmail();
+                                        await _saveRememberedEmail();
                                         ref
                                             .read(
                                               authViewModelProvider.notifier,
@@ -387,8 +395,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             OutlinedButton.icon(
                               onPressed: authState.isLoading
                                   ? null
-                                  : () {
-                                      _saveRememberedEmail();
+                                  : () async {
+                                      await _saveRememberedEmail();
                                       ref
                                           .read(authViewModelProvider.notifier)
                                           .signInWithGoogle();

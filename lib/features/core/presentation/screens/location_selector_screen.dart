@@ -47,7 +47,7 @@ class _LocationSelectorSheetState extends State<LocationSelectorSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -71,7 +71,7 @@ class _LocationSelectorSheetState extends State<LocationSelectorSheet> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(Icons.location_on_rounded, color: Colors.green[700]),
@@ -101,7 +101,7 @@ class _LocationSelectorSheetState extends State<LocationSelectorSheet> {
                   onTap: () {
                     setState(() => _selected = loc);
                     Future.delayed(const Duration(milliseconds: 200), () {
-                      Navigator.of(context).pop(loc);
+                      if (context.mounted) Navigator.of(context).pop(loc);
                     });
                   },
                   child: AnimatedContainer(
@@ -110,7 +110,7 @@ class _LocationSelectorSheetState extends State<LocationSelectorSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.green.withOpacity(0.08)
+                          ? Colors.green.withValues(alpha: 0.08)
                           : (isDark ? Colors.grey[900] : Colors.grey[50]),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(

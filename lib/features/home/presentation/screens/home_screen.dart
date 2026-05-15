@@ -65,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _showLocationPicker(BuildContext context) async {
     final selected = await LocationSelectorSheet.show(context, 'Kathmandu, Nepal');
-    if (selected != null && mounted) {
+    if (selected != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Location updated to $selected'),
@@ -148,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               IconButton(
                 onPressed: () {
                   final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
-                  ref.read(themeModeProvider.notifier).state = newMode;
+                  ref.read(themeModeProvider.notifier).setTheme(newMode);
                 },
                 icon: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 500),
@@ -281,7 +281,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
                             ),
@@ -300,7 +300,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               height: 42,
                               width: 42,
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.12),
+                                color: Colors.green.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(
@@ -633,11 +633,11 @@ class _ProductCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product.price}',
+                        'Rs. ${product.price}',
                         style: GoogleFonts.outfit(
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.green[800],
+                          color: Colors.green[700],
                         ),
                       ),
                       GestureDetector(

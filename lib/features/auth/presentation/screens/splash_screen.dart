@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:eco_bazzar_hub/core/providers.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -26,24 +25,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     if (!mounted) return;
 
-    // 2. Check permissions
-    final hasContacts = await Permission.contacts.isGranted;
-    final hasLocation = await Permission.location.isGranted;
-    final hasStorage = await Permission.storage.isGranted;
-
-    if (!hasContacts || !hasLocation || !hasStorage) {
-      if (!mounted) return;
-      context.go('/permissions');
-      return;
-    }
-
-    // 3. Check if first time for onboarding
-    final prefs = ref.read(sharedPreferencesProvider);
-    final isFirstTime = prefs.getBool('is_first_time') ?? true;
+    // 2. Check if first time for initial flow
+    final isFirstTime = await ref.read(databaseProvider).getSetting('is_first_time') != 'false';
 
     if (!mounted) return;
     if (isFirstTime) {
-      context.go('/onboarding');
+      context.go('/permissions');
       return;
     }
 
@@ -75,8 +62,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.3),
-                  const Color(0xFF2D6A4F).withOpacity(0.85),
+                  Colors.black.withValues(alpha: 0.3),
+                  const Color(0xFF2D6A4F).withValues(alpha: 0.85),
                 ],
               ),
             ),
@@ -92,7 +79,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),

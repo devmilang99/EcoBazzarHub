@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:eco_bazzar_hub/core/providers.dart';
 
 class OnboardingData {
   final String title;
@@ -67,9 +66,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _finishOnboarding() {
-    final prefs = ref.read(sharedPreferencesProvider);
-    prefs.setBool('is_first_time', false);
-    context.go('/login');
+    context.go('/theme-selection');
   }
 
   void _startAutoSlide() {

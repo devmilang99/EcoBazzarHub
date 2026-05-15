@@ -4,7 +4,8 @@ class ProductModel extends Equatable {
   final String id;
   final String name;
   final double price;
-  final String image;
+  final String imageUrl;
+  final String category;
   final String categoryId;
   final bool isFavorite;
   final String description;
@@ -13,7 +14,8 @@ class ProductModel extends Equatable {
     required this.id,
     required this.name,
     required this.price,
-    required this.image,
+    required this.imageUrl,
+    required this.category,
     required this.categoryId,
     this.isFavorite = false,
     this.description = 'Premium quality product for you.',
@@ -23,7 +25,8 @@ class ProductModel extends Equatable {
     String? id,
     String? name,
     double? price,
-    String? image,
+    String? imageUrl,
+    String? category,
     String? categoryId,
     bool? isFavorite,
     String? description,
@@ -32,7 +35,8 @@ class ProductModel extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       price: price ?? this.price,
-      image: image ?? this.image,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
       categoryId: categoryId ?? this.categoryId,
       isFavorite: isFavorite ?? this.isFavorite,
       description: description ?? this.description,
@@ -40,5 +44,17 @@ class ProductModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, price, image, categoryId, isFavorite, description];
+  List<Object?> get props => [
+    id,
+    name,
+    price,
+    imageUrl,
+    category,
+    categoryId,
+    isFavorite,
+    description,
+  ];
+
+  String get image => imageUrl;
+  String get productImageUrl => imageUrl;
 }

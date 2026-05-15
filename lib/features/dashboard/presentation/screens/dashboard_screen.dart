@@ -2,6 +2,8 @@ import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmo
 import 'package:eco_bazzar_hub/features/cart/presentation/providers/cart_provider.dart';
 import 'package:eco_bazzar_hub/features/cart/presentation/screens/cart_screen.dart';
 import 'package:eco_bazzar_hub/features/home/presentation/screens/home_screen.dart';
+import 'package:eco_bazzar_hub/features/orders/presentation/providers/order_provider.dart';
+import 'package:eco_bazzar_hub/features/orders/domain/models/order_model.dart';
 import 'package:eco_bazzar_hub/features/orders/presentation/screens/order_history_screen.dart';
 import 'package:eco_bazzar_hub/features/profile/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +50,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(dashboardIndexProvider);
     final cartItemsCount = ref.watch(cartProvider).items.length;
+    final orders = ref.watch(orderProvider);
+    final activeOrdersCount = orders
+        .where(
+          (o) =>
+              o.status != OrderStatus.delivered &&
+              o.status != OrderStatus.cancelled,
+        )
+        .length;
     final authState = ref.watch(authViewModelProvider);
     final userPhotoUrl = authState.user?.photoUrl;
 
@@ -131,9 +141,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   ),
                   label: 'Cart',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.history_outlined),
-                  activeIcon: Icon(Icons.history_rounded),
+                BottomNavigationBarItem(
+                  icon: badges.Badge(
+                    showBadge: activeOrdersCount > 0,
+                    badgeContent: Text(
+                      activeOrdersCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    badgeStyle: const badges.BadgeStyle(
+                      badgeColor: Colors.orange,
+                    ),
+                    child: const Icon(Icons.history_outlined),
+                  ),
+                  activeIcon: badges.Badge(
+                    showBadge: activeOrdersCount > 0,
+                    badgeContent: Text(
+                      activeOrdersCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    badgeStyle: const badges.BadgeStyle(
+                      badgeColor: Colors.orange,
+                    ),
+                    child: const Icon(Icons.history_rounded),
+                  ),
                   label: 'Orders',
                 ),
                 BottomNavigationBarItem(

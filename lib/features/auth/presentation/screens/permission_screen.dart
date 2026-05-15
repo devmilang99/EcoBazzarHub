@@ -1,9 +1,29 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:eco_bazzar_hub/core/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+
+class PermissionInfo {
+  final String title;
+  final String description;
+  final IconData icon;
+  final String imageUrl;
+  final Permission permission;
+  final List<Permission>? android13Permissions;
+
+  PermissionInfo({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.imageUrl,
+    required this.permission,
+    this.android13Permissions,
+  });
+}
 
 class PermissionScreen extends ConsumerStatefulWidget {
   const PermissionScreen({super.key});
@@ -13,279 +33,279 @@ class PermissionScreen extends ConsumerStatefulWidget {
 }
 
 class _PermissionScreenState extends ConsumerState<PermissionScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
   bool _isLoading = false;
-  bool _showThemeSelection = false;
 
-  Future<void> _requestPermissions() async {
+  final List<PermissionInfo> _permissions = [
+    PermissionInfo(
+      title: 'Location Access',
+      description:
+          'We need your location to find the nearest delivery hubs and provide accurate shipping estimates.',
+      icon: Icons.location_on_rounded,
+      imageUrl:
+          'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2066&auto=format&fit=crop',
+      permission: Permission.location,
+    ),
+    PermissionInfo(
+      title: 'Storage & Photos',
+      description:
+          'Access to storage allows you to upload profile pictures and save invoices directly to your device.',
+      icon: Icons.image_rounded,
+      imageUrl:
+          'https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?q=80&w=2070&auto=format&fit=crop',
+      permission: Permission.storage,
+      android13Permissions: [
+        Permission.photos,
+        Permission.videos,
+        Permission.audio,
+      ],
+    ),
+    PermissionInfo(
+      title: 'Contact List',
+      description:
+          'Syncing contacts helps you find friends on EcoBazzar and easily share vouchers with them.',
+      icon: Icons.contacts_rounded,
+      imageUrl:
+          'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=2070&auto=format&fit=crop',
+      permission: Permission.contacts,
+    ),
+    PermissionInfo(
+      title: 'Notifications',
+      description:
+          'Get real-time updates on your order status, exclusive flash deals, and eco-tips.',
+      icon: Icons.notifications_active_rounded,
+      imageUrl:
+          'https://images.unsplash.com/photo-1512428559083-a4979b2b51ff?q=80&w=2070&auto=format&fit=crop',
+      permission: Permission.notification,
+    ),
+  ];
+
+  Future<void> _requestPermission(PermissionInfo info) async {
     setState(() => _isLoading = true);
 
-    await [
-      Permission.contacts,
-      Permission.location,
-      Permission.storage,
-      Permission.photos,
-    ].request();
+    // Logic for Android 13+ storage
+    if (info.permission == Permission.storage && Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        // Use granular permissions for Android 13+
+        if (info.android13Permissions != null) {
+          await info.android13Permissions!.request();
+        } else {
+          await info.permission.request();
+        }
+      } else {
+        // Use standard storage permission for Android 12 and below
+        await info.permission.request();
+      }
+    } else {
+      await info.permission.request();
+    }
 
-    setState(() {
-      _isLoading = false;
-      _showThemeSelection = true;
-    });
+    setState(() => _isLoading = false);
+    _nextPage();
   }
 
-  void _selectTheme(ThemeMode mode) {
-    ref.read(themeModeProvider.notifier).state = mode;
-    // Mark as not first time after setup is done
-    final prefs = ref.read(sharedPreferencesProvider);
-    prefs.setBool(
-      'is_first_time',
-      true,
-    ); // Keep it true until onboarding is done
-    context.go('/onboarding');
+  void _nextPage() {
+    if (_currentPage < _permissions.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      context.go('/onboarding');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.network(
-            'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2013&auto=format&fit=crop',
-            fit: BoxFit.cover,
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.6),
-                  const Color(0xFF1B4332).withOpacity(0.9),
-                  Colors.black,
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: AnimatedSwitcher(
-                duration: 500.ms,
-                child: _showThemeSelection
-                    ? _buildThemeSelection()
-                    : _buildPermissionRequest(),
-              ),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.black,
+      body: _buildPermissionSlider(),
     );
   }
 
-  Widget _buildPermissionRequest() {
-    return Column(
-      key: const ValueKey('permission'),
-      mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildPermissionSlider() {
+    return Stack(
       children: [
-        Container(
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF52B788).withOpacity(0.3)),
-          ),
-          child: const Icon(
-            Icons.privacy_tip_rounded,
-            size: 80,
-            color: Color(0xFF52B788),
-          ),
-        ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack),
-        const SizedBox(height: 48),
-        const Text(
-          'Permissions',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            letterSpacing: -0.5,
-          ),
-        ).animate().fadeIn(delay: 200.ms),
-        const SizedBox(height: 16),
-        Text(
-          'Allow EcoBazzar Hub to access essential services for a seamless experience.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
-            height: 1.5,
-          ),
-        ).animate().fadeIn(delay: 400.ms),
-        const SizedBox(height: 48),
-        _PermissionRow(
-          icon: Icons.contacts_rounded,
-          title: 'Contacts',
-          delay: 600.ms,
-        ),
-        _PermissionRow(
-          icon: Icons.location_on_rounded,
-          title: 'Location',
-          delay: 700.ms,
-        ),
-        _PermissionRow(
-          icon: Icons.folder_rounded,
-          title: 'Storage & Photos',
-          delay: 800.ms,
-        ),
-        const SizedBox(height: 64),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _requestPermissions,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D6A4F),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: _isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text(
-                    'Allow Permissions',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _currentPage = index),
+          itemCount: _permissions.length,
+          itemBuilder: (context, index) {
+            final info = _permissions[index];
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  info.imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(color: Colors.black);
+                  },
+                ).animate().scale(
+                  begin: const Offset(1.1, 1.1),
+                  end: const Offset(1.0, 1.0),
+                  duration: 10.seconds,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.2),
+                        Colors.black.withValues(alpha: 0.5),
+                        Colors.black.withValues(alpha: 0.9),
+                        Colors.black,
+                      ],
+                    ),
                   ),
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                      vertical: 24.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF52B788,
+                            ).withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(
+                                0xFF52B788,
+                              ).withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Icon(
+                            info.icon,
+                            color: const Color(0xFF52B788),
+                            size: 32,
+                          ),
+                        ).animate().scale(
+                          duration: 600.ms,
+                          curve: Curves.easeOutBack,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                              info.title,
+                              style: GoogleFonts.outfit(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -1,
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(delay: 200.ms)
+                            .slideX(begin: -0.1, end: 0),
+                        const SizedBox(height: 16),
+                        Text(
+                              info.description,
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                color: Colors.white.withValues(alpha: 0.7),
+                                height: 1.5,
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(delay: 400.ms)
+                            .slideX(begin: -0.1, end: 0),
+                        const SizedBox(height: 32),
+                        Row(
+                          children: List.generate(
+                            _permissions.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.only(right: 8),
+                              height: 8,
+                              width: _currentPage == index ? 24 : 8,
+                              decoration: BoxDecoration(
+                                color: _currentPage == index
+                                    ? const Color(0xFF52B788)
+                                    : Colors.white24,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ).animate().fadeIn(delay: 500.ms),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _isLoading
+                                    ? null
+                                    : () => _requestPermission(info),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2D6A4F),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Text(
+                                        'Allow Access',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(delay: 600.ms)
+                            .slideY(begin: 0.2, end: 0),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        SafeArea(
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextButton(
+                onPressed: _isLoading ? null : _nextPage,
+                child: Text(
+                  'Skip',
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ).animate().fadeIn(delay: 1.seconds).scale(),
+        ).animate().fadeIn(delay: 1.seconds),
       ],
-    );
-  }
-
-  Widget _buildThemeSelection() {
-    return Column(
-      key: const ValueKey('theme'),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Personalize Your Theme',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ).animate().fadeIn(),
-        const SizedBox(height: 16),
-        Text(
-          'Choose the mode that best fits your style.',
-          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
-        ),
-        const SizedBox(height: 60),
-        Row(
-          children: [
-            Expanded(
-              child: _ThemeCard(
-                mode: ThemeMode.light,
-                title: 'Light Mode',
-                icon: Icons.light_mode_rounded,
-                onTap: () => _selectTheme(ThemeMode.light),
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: _ThemeCard(
-                mode: ThemeMode.dark,
-                title: 'Dark Mode',
-                icon: Icons.dark_mode_rounded,
-                onTap: () => _selectTheme(ThemeMode.dark),
-              ),
-            ),
-          ],
-        ).animate().slideY(begin: 0.2, end: 0, duration: 600.ms).fadeIn(),
-      ],
-    );
-  }
-}
-
-class _PermissionRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Duration delay;
-
-  const _PermissionRow({
-    required this.icon,
-    required this.title,
-    required this.delay,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF52B788), size: 28),
-          const SizedBox(width: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Spacer(),
-          const Icon(
-            Icons.check_circle_outline,
-            color: Colors.white24,
-            size: 20,
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: delay).slideX(begin: 0.1, end: 0);
-  }
-}
-
-class _ThemeCard extends StatelessWidget {
-  final ThemeMode mode;
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ThemeCard({
-    required this.mode,
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 32),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 48, color: const Color(0xFF52B788)),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

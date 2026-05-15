@@ -57,11 +57,8 @@ class ThemeSelectionScreen extends ConsumerWidget {
               const Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  // Mark first time as complete
-                  ref
-                      .read(sharedPreferencesProvider)
-                      .setBool('is_first_time', false);
-                  ref.read(isFirstTimeProvider.notifier).state = false;
+                  // Mark first time as complete using the notifier
+                  ref.read(isFirstTimeProvider.notifier).setFirstTime(false);
                   context.go('/login');
                 },
                 child: const Text('Continue to Login'),
@@ -74,10 +71,8 @@ class ThemeSelectionScreen extends ConsumerWidget {
     );
   }
 
-  void _updateTheme(WidgetRef ref, ThemeMode mode) async {
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setInt('theme_mode', mode.index);
-    ref.read(themeModeProvider.notifier).state = mode;
+  void _updateTheme(WidgetRef ref, ThemeMode mode) {
+    ref.read(themeModeProvider.notifier).setTheme(mode);
   }
 }
 
