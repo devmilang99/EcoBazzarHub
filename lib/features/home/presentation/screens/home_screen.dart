@@ -26,6 +26,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _autoSlideTimer;
+  final FocusNode _searchFocusNode = FocusNode();
+  bool _isSearchFocused = false;
 
   final List<String> _sliderImages = [
     'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop',
@@ -37,11 +39,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _startAutoSlide();
+    _searchFocusNode.addListener(() {
+      setState(() {
+        _isSearchFocused = _searchFocusNode.hasFocus;
+      });
+    });
   }
 
   @override
   void dispose() {
     _autoSlideTimer?.cancel();
+    _searchFocusNode.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -64,17 +72,223 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showLocationPicker(BuildContext context) async {
-    final selected = await LocationSelectorSheet.show(context, 'Kathmandu, Nepal');
+    final selected = await LocationSelectorSheet.show(
+      context,
+      'Kathmandu, Nepal',
+    );
     if (selected != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Location updated to $selected'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           backgroundColor: Colors.green[700],
         ),
       );
     }
+  }
+
+  void _showFilterSheet(BuildContext context) {
+    final homeState = ref.read(homeViewModelProvider);
+    final homeNotifier = ref.read(homeViewModelProvider.notifier);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sort & Filter',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Sort by',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('Best Overall', style: GoogleFonts.outfit()),
+                    trailing:
+                        homeState.sortOption == ProductSortOption.bestOverall
+                        ? Icon(Icons.check_circle, color: Colors.green[700])
+                        : null,
+                    onTap: () {
+                      homeNotifier.updateSortOption(
+                        ProductSortOption.bestOverall,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      'Price: Low to High',
+                      style: GoogleFonts.outfit(),
+                    ),
+                    trailing:
+                        homeState.sortOption == ProductSortOption.lowToHigh
+                        ? Icon(Icons.check_circle, color: Colors.green[700])
+                        : null,
+                    onTap: () {
+                      homeNotifier.updateSortOption(
+                        ProductSortOption.lowToHigh,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      'Price: High to Low',
+                      style: GoogleFonts.outfit(),
+                    ),
+                    trailing:
+                        homeState.sortOption == ProductSortOption.highToLow
+                        ? Icon(Icons.check_circle, color: Colors.green[700])
+                        : null,
+                    onTap: () {
+                      homeNotifier.updateSortOption(
+                        ProductSortOption.highToLow,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    value: homeState.favoritesOnly,
+                    onChanged: (value) {
+                      if (value != null) {
+                        homeNotifier.toggleFavoritesOnly(value);
+                      }
+                    },
+                    title: Text(
+                      'Show only favorites',
+                      style: GoogleFonts.outfit(),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    activeColor: Colors.green[700],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'More actions',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.public, color: Colors.green[700]),
+                    title: Text(
+                      'Search the internet',
+                      style: GoogleFonts.outfit(),
+                    ),
+                    subtitle: Text(
+                      'Find matching products online',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'Internet search is not implemented yet.',
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            homeNotifier.updateSortOption(
+                              ProductSortOption.bestOverall,
+                            );
+                            homeNotifier.toggleFavoritesOnly(false);
+                            Navigator.of(context).pop();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: isDark
+                                ? Colors.white
+                                : Colors.black,
+                            side: BorderSide(color: Colors.grey.shade400),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            'Clear filters',
+                            style: GoogleFonts.outfit(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[700],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text('Apply', style: GoogleFonts.outfit()),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -98,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           // 1. Unified SliverAppBar with Slider, Search and Categories
           SliverAppBar(
-            expandedHeight: 400,
+            expandedHeight: _isSearchFocused ? 200 : 400,
             floating: false,
             pinned: true,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -205,175 +419,148 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               background: Column(
                 children: [
                   const SizedBox(height: 100), // Height of app bar
-                  SizedBox(
-                    height: 180,
-                    child: PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (i) => setState(() => _currentPage = i),
-                      itemCount: _sliderImages.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  _sliderImages[index],
-                                  fit: BoxFit.cover,
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withValues(alpha: 0.6),
-                                      ],
+                  if (!_isSearchFocused) ...[
+                    SizedBox(
+                      height: 180,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (i) => setState(() => _currentPage = i),
+                        itemCount: _sliderImages.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.network(
+                                    _sliderImages[index],
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withValues(alpha: 0.6),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _sliderImages.length,
-                      (index) => AnimatedContainer(
-                        duration: 300.ms,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentPage == index ? 24 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? Colors.green
-                              : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _sliderImages.length,
+                        (index) => AnimatedContainer(
+                          duration: 300.ms,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: _currentPage == index ? 24 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _currentPage == index
+                                ? Colors.green
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(120),
+              preferredSize: const Size.fromHeight(140),
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Column(
                   children: [
-                    // Premium Search Bar Card
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Container(
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[950] : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 18,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.grey[800]!
-                                : Colors.grey[200]!,
-                            width: 1,
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: Row(
-                          children: [
-                            Container(
-                              height: 42,
-                              width: 42,
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Icon(
-                                Icons.search_rounded,
-                                color: Colors.green[700],
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: TextField(
-                                onTapOutside: (event) =>
-                                    FocusScope.of(context).unfocus(),
-                                onChanged: homeNotifier.updateSearchQuery,
-                                cursorColor: Colors.green[700],
-                                decoration: InputDecoration(
-                                  hintText: 'Search sustainable essentials',
-                                  hintStyle: GoogleFonts.outfit(
-                                    color: Colors.grey[500],
-                                    fontSize: 15,
-                                  ),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                ),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            TextButton.icon(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
-                                ),
-                                backgroundColor: Colors.green[700],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.tune_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                              label: Text(
-                                'Filters',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    // Search Bar
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          _SearchChip(label: 'Organic'),
-                          const SizedBox(width: 10),
-                          _SearchChip(label: 'Fair Trade'),
-                          const SizedBox(width: 10),
-                          _SearchChip(label: 'New Arrival'),
+                          Expanded(
+                            child: Container(
+                              height: 64,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+
+                              child: Center(
+                                child: TextField(
+                                  onTapOutside: (event) =>
+                                      FocusScope.of(context).unfocus(),
+                                  onChanged: homeNotifier.updateSearchQuery,
+                                  cursorColor: Colors.green[700],
+                                  decoration: InputDecoration(
+                                    hintText: 'Search products...',
+                                    hintStyle: GoogleFonts.outfit(
+                                      color: Colors.grey[500],
+                                      fontSize: 15,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search_rounded,
+                                      color: Colors.green[700],
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                  focusNode: _searchFocusNode,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => _showFilterSheet(context),
+                            child: Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[850]
+                                    : Colors.grey[100],
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.grey[700]!
+                                      : Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.tune_rounded,
+                                  color: Colors.green[700],
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 12),
                     // Categories
                     SizedBox(
@@ -489,7 +676,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               homeNotifier.toggleFavorite(product.id),
                           onAddToCart: () {
                             ref.read(cartProvider.notifier).addToCart(product);
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(
+                              context,
+                            ).removeCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('${product.name} added to cart'),
@@ -497,7 +686,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                duration: const Duration(seconds: 1),
+                                duration: const Duration(milliseconds: 500),
                                 action: SnackBarAction(
                                   label: 'View',
                                   onPressed: () =>
@@ -664,30 +853,5 @@ class _ProductCard extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
-  }
-}
-
-class _SearchChip extends StatelessWidget {
-  final String label;
-  const _SearchChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[850] : Colors.green[50],
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.outfit(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : Colors.green[800],
-        ),
-      ),
-    );
   }
 }

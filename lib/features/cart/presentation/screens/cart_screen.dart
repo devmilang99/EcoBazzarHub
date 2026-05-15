@@ -548,7 +548,7 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Rs. ${state.total.toStringAsFixed(2)}',
+                  'Rs. ${state.total.round()}',
                   style: GoogleFonts.outfit(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -761,7 +761,7 @@ class CartScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _buildDialogDetailRow('Payment', paymentMethod, isDark),
                         const SizedBox(height: 8),
-                        _buildDialogDetailRow('Total Amount', 'Rs. ${total.toStringAsFixed(2)}', isDark, isTotal: true),
+                        _buildDialogDetailRow('Total Amount', 'Rs. ${total.round()}', isDark, isTotal: true),
                         const SizedBox(height: 32),
                         Row(
                           children: [

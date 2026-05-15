@@ -79,6 +79,35 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          if (_tabController.index == 1 && completedOrders.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.delete_sweep_rounded, color: isDark ? Colors.white : Colors.black87),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Delete All Completed Orders', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                    content: Text('Are you sure you want to clear your completed order history?', style: GoogleFonts.outfit()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        onPressed: () => Navigator.pop(context, true), 
+                        child: Text('Delete All', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  ref.read(orderProvider.notifier).deleteAllCompletedOrders();
+                }
+              },
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: activeColor,
@@ -112,7 +141,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
 }
 
 // ── Order list ─────────────────────────────────────────────────────────────
-class _OrderList extends StatelessWidget {
+class _OrderList extends ConsumerWidget {
   final List<OrderModel> orders;
   final bool isRecent;
   final bool showReceipt;
@@ -126,7 +155,7 @@ class _OrderList extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (orders.isEmpty) {
       return _EmptyOrderState(tabType: tabType);
     }
@@ -134,12 +163,54 @@ class _OrderList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
       itemBuilder: (context, index) {
-        return _OrderCard(
+        final card = _OrderCard(
           key: ValueKey(orders[index].id),
           order: orders[index],
           isRecent: isRecent,
           showReceipt: showReceipt,
         );
+
+        if (tabType == 'completed') {
+          return Dismissible(
+            key: ValueKey(orders[index].id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: const Icon(Icons.delete_outline, color: Colors.white, size: 32),
+            ),
+            confirmDismiss: (direction) async {
+              return await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Delete Order', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  content: Text('Are you sure you want to delete this order from history?', style: GoogleFonts.outfit()),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      onPressed: () => Navigator.pop(context, true), 
+                      child: Text('Delete', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              );
+            },
+            onDismissed: (direction) {
+              ref.read(orderProvider.notifier).deleteOrder(orders[index].id);
+            },
+            child: card,
+          );
+        }
+        return card;
       },
     );
   }
@@ -191,7 +262,10 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
         color: isDark ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: isPending
-            ? Border.all(color: Colors.orange.withValues(alpha: 0.5), width: 1.5)
+            ? Border.all(
+                color: Colors.orange.withValues(alpha: 0.5),
+                width: 1.5,
+              )
             : null,
         boxShadow: [
           BoxShadow(
@@ -337,7 +411,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                             ),
                           ),
                           Text(
-                            'Rs. ${order.totalAmount.toStringAsFixed(2)}',
+                            'Rs. ${order.totalAmount.round()}',
                             style: GoogleFonts.outfit(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -356,21 +430,28 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         fontSize: 13,
                       ),
                     ),
-                ],
+                  ],
                 ),
 
-                if (order.status == OrderStatus.cancelled && order.cancellationReason != null) ...[
+                if (order.status == OrderStatus.cancelled &&
+                    order.cancellationReason != null) ...[
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.1),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline_rounded, size: 16, color: Colors.red),
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          size: 16,
+                          color: Colors.red,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -387,112 +468,123 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                   ),
                 ],
 
-                // ── Feedback & Rating (Delivered orders only) ────────────
-                if (order.status == OrderStatus.delivered) ...[
+                if (order.status == OrderStatus.delivered &&
+                    order.rating != null) ...[
                   const SizedBox(height: 12),
-                  if (order.rating == null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showRatingDialog(context, order),
-                        icon: const Icon(Icons.star_outline_rounded, size: 16),
-                        label: Text(
-                          'Rate & Review',
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber[700],
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.amber.withValues(alpha: 0.1),
                       ),
-                    )
-                  else
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber.withValues(alpha: 0.1)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              ...List.generate(
-                                5,
-                                (index) => Icon(
-                                  index < order.rating!
-                                      ? Icons.star_rounded
-                                      : Icons.star_outline_rounded,
-                                  size: 14,
-                                  color: Colors.amber[700],
-                                ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            ...List.generate(
+                              5,
+                              (index) => Icon(
+                                index < order.rating!
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                size: 14,
+                                color: Colors.amber[700],
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Your Feedback',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amber[900],
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (order.comment != null && order.comment!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
-                              order.comment!,
+                              'Your Feedback',
                               style: GoogleFonts.outfit(
                                 fontSize: 12,
-                                color: isDark ? Colors.grey[300] : Colors.grey[700],
-                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber[900],
                               ),
                             ),
                           ],
+                        ),
+                        if (order.comment != null &&
+                            order.comment!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            order.comment!,
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Colors.grey[300]
+                                  : Colors.grey[700],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
-                      ),
+                      ],
                     ),
+                  ),
                 ],
 
-                // ── View Receipt button (completed orders only) ──────────
+                // ── View receipt + rating icon in completed orders ─────────
                 if (widget.showReceipt) ...[
                   const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrderReceiptScreen(order: order),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => OrderReceiptScreen(order: order),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 16,
+                          ),
+                          label: Text(
+                            'View Receipt',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.green[700],
+                            side: BorderSide(color: Colors.green[700]!),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
                         ),
                       ),
-                      icon: const Icon(Icons.receipt_long_rounded, size: 16),
-                      label: Text(
-                        'View Receipt',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.green[700],
-                        side: BorderSide(color: Colors.green[700]!),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
+                      const SizedBox(width: 12),
+                      Container(
+                        height: 48,
+                        width: 48,
+                        decoration: BoxDecoration(
+                          color: order.rating != null
+                              ? Colors.amber[700]
+                              : Colors.green[700],
                           borderRadius: BorderRadius.circular(14),
                         ),
+                        child: IconButton(
+                          onPressed: order.rating != null
+                              ? null
+                              : () => _showRatingDialog(context, order),
+                          icon: Icon(
+                            order.rating != null
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: Colors.white,
+                          ),
+                          tooltip: order.rating != null
+                              ? 'Rated ${order.rating}/5'
+                              : 'Rate order',
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ],
@@ -547,7 +639,11 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildStepIcon(Icons.inventory_2_outlined, step >= 1, 'Packing'),
+                  _buildStepIcon(
+                    Icons.inventory_2_outlined,
+                    step >= 1,
+                    'Packing',
+                  ),
                   _buildStepLine(step >= 2, lineWidth),
                   _buildStepIcon(
                     Icons.local_shipping_outlined,
@@ -704,54 +800,79 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
 
     String? selectedReason;
 
+    ref.read(orderProvider.notifier).pauseOrder(order.id);
+
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(
-            'Cancel Order',
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Please select a reason for cancellation:',
-                style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              ...reasons.map((reason) => RadioListTile<String>(
-                    title: Text(reason, style: GoogleFonts.outfit(fontSize: 14)),
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(
+              'Cancel Order',
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Please select a reason for cancellation:',
+                  style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                ...reasons.map(
+                  (reason) => RadioListTile<String>(
+                    title: Text(
+                      reason,
+                      style: GoogleFonts.outfit(fontSize: 14),
+                    ),
                     value: reason,
                     groupValue: selectedReason,
                     activeColor: Colors.red,
                     contentPadding: EdgeInsets.zero,
-                    onChanged: (val) => setDialogState(() => selectedReason = val),
-                  )),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Keep Order', style: GoogleFonts.outfit(color: Colors.grey)),
+                    onChanged: (val) =>
+                        setDialogState(() => selectedReason = val),
+                  ),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: selectedReason == null
-                  ? null
-                  : () {
-                      ref.read(orderProvider.notifier).cancelOrder(order.id, selectedReason!);
-                      Navigator.pop(context);
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                elevation: 0,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ref.read(orderProvider.notifier).resumeOrder(order.id);
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Keep Order',
+                  style: GoogleFonts.outfit(color: Colors.grey),
+                ),
               ),
-              child: Text('Confirm Cancellation', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+              ElevatedButton(
+                onPressed: selectedReason == null
+                    ? null
+                    : () async {
+                        await ref
+                            .read(orderProvider.notifier)
+                            .cancelOrder(order.id, selectedReason!);
+                        Navigator.pop(context);
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Confirm Cancellation',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
         ),
       ),
     );
@@ -778,7 +899,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                   5,
                   (index) => IconButton(
                     icon: Icon(
-                      index < rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                      index < rating
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
                       color: Colors.amber[700],
                       size: 32,
                     ),
@@ -804,11 +927,16 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Later', style: GoogleFonts.outfit(color: Colors.grey)),
+              child: Text(
+                'Later',
+                style: GoogleFonts.outfit(color: Colors.grey),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
-                ref.read(orderProvider.notifier).updateOrderFeedback(
+                ref
+                    .read(orderProvider.notifier)
+                    .updateOrderFeedback(
                       order.id,
                       rating,
                       commentController.text,
@@ -820,10 +948,15 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                 foregroundColor: Colors.white,
                 elevation: 0,
               ),
-              child: Text('Submit Review', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+              child: Text(
+                'Submit Review',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
       ),
     );
@@ -856,12 +989,14 @@ class _CancellationBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-          urgentColor.withValues(alpha: 0.15),
-          urgentColor.withValues(alpha: 0.05),
+            urgentColor.withValues(alpha: 0.15),
+            urgentColor.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(bottom: BorderSide(color: urgentColor.withValues(alpha: 0.2))),
+        border: Border(
+          bottom: BorderSide(color: urgentColor.withValues(alpha: 0.2)),
+        ),
       ),
       child: Row(
         children: [
@@ -1108,7 +1243,9 @@ class _EmptyOrderState extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: (config['shadowColor'] as Color).withValues(alpha: 0.18),
+                    color: (config['shadowColor'] as Color).withValues(
+                      alpha: 0.18,
+                    ),
                     blurRadius: 28,
                     offset: const Offset(0, 14),
                   ),

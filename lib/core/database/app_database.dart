@@ -153,6 +153,25 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
+
+  /// Deletes a specific order and its items.
+  Future<void> deleteOrder(String orderId) async {
+    await transaction(() async {
+      await (delete(orderItemsTable)..where((t) => t.orderId.equals(orderId))).go();
+      await (delete(orders)..where((t) => t.id.equals(orderId))).go();
+    });
+  }
+
+  /// Deletes all orders with a specific status.
+  Future<void> deleteOrdersByStatus(int status) async {
+    await transaction(() async {
+      final ordersToDelete = await (select(orders)..where((t) => t.status.equals(status))).get();
+      for (final order in ordersToDelete) {
+        await (delete(orderItemsTable)..where((t) => t.orderId.equals(order.id))).go();
+      }
+      await (delete(orders)..where((t) => t.status.equals(status))).go();
+    });
+  }
 }
 
 QueryExecutor _openConnection() {

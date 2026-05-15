@@ -129,10 +129,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           color: Colors.black.withValues(alpha: 0.2),
                           child: IconButton(
                             icon: Icon(
-                              ref.watch(homeViewModelProvider.select((s) => s.products.firstWhere((p) => p.id == widget.product.id, orElse: () => widget.product))).isFavorite
+                              ref
+                                      .watch(
+                                        homeViewModelProvider.select(
+                                          (s) => s.products.firstWhere(
+                                            (p) => p.id == widget.product.id,
+                                            orElse: () => widget.product,
+                                          ),
+                                        ),
+                                      )
+                                      .isFavorite
                                   ? Icons.favorite_rounded
                                   : Icons.favorite_border_rounded,
-                              color: ref.watch(homeViewModelProvider.select((s) => s.products.firstWhere((p) => p.id == widget.product.id, orElse: () => widget.product))).isFavorite
+                              color:
+                                  ref
+                                      .watch(
+                                        homeViewModelProvider.select(
+                                          (s) => s.products.firstWhere(
+                                            (p) => p.id == widget.product.id,
+                                            orElse: () => widget.product,
+                                          ),
+                                        ),
+                                      )
+                                      .isFavorite
                                   ? Colors.red
                                   : Colors.white,
                               size: 20,
@@ -465,7 +484,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                             ),
                             OutlinedButton(
-                              onPressed: () {},
+                              onPressed: () => _showSellerInfoSheet(context),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.green,
                                 side: const BorderSide(color: Colors.green),
@@ -521,8 +540,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             .map((review) => _ReviewCard(review: review))
                             .toList(),
                       ),
-
-
                     ],
                   ),
                 ),
@@ -642,6 +659,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       ),
     );
   }
+
+  void _showSellerInfoSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _SellerInfoSheet(
+        sellerName: sellerName,
+        sellerLocation: sellerLocation,
+      ),
+    );
+  }
 }
 
 class _QuantityButton extends StatelessWidget {
@@ -727,12 +756,16 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
   String _selectedPaymentMethod = 'Credit Card';
   String? _selectedVoucher;
 
-  double get subtotal => widget.product.price * widget.quantity;
-  double get tax => subtotal * 0.05;
-  double get discount => _selectedVoucher == 'ECO20'
-      ? subtotal * 0.2
-      : (_selectedVoucher == 'WELCOME10' ? subtotal * 0.1 : 0);
-  double get total => subtotal + tax - discount;
+  double get subtotal =>
+      (widget.product.price * widget.quantity).round().toDouble();
+  double get tax => (subtotal * 0.05).round().toDouble();
+  double get discount =>
+      (_selectedVoucher == 'ECO20'
+              ? subtotal * 0.2
+              : (_selectedVoucher == 'WELCOME10' ? subtotal * 0.1 : 0))
+          .round()
+          .toDouble();
+  double get total => (subtotal + tax - discount).round().toDouble();
 
   @override
   Widget build(BuildContext context) {
@@ -936,13 +969,21 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
 
           ElevatedButton(
             onPressed: () {
-              ref.read(orderProvider.notifier).placeOrder([
-                CartItem(
-                  product: widget.product,
-                  quantity: widget.quantity,
-                  sellerName: widget.sellerName,
-                ),
-              ], total, subtotal, tax, discount);
+              ref
+                  .read(orderProvider.notifier)
+                  .placeOrder(
+                    [
+                      CartItem(
+                        product: widget.product,
+                        quantity: widget.quantity,
+                        sellerName: widget.sellerName,
+                      ),
+                    ],
+                    total,
+                    subtotal,
+                    tax,
+                    discount,
+                  );
 
               Navigator.pop(context); // Close sheet
               Navigator.pop(context); // Go back to home
@@ -1072,7 +1113,7 @@ class _CalculationRow extends StatelessWidget {
           ),
         ),
         Text(
-          '${value < 0 ? '-' : ''}Rs. ${value.abs().toStringAsFixed(2)}',
+          '${value < 0 ? '-' : ''}Rs. ${isTotal ? value.abs().round() : value.abs().toStringAsFixed(2)}',
           style: GoogleFonts.outfit(
             fontSize: isTotal ? 18 : 14,
             fontWeight: FontWeight.bold,
@@ -1098,6 +1139,220 @@ class _CustomerReview {
     required this.date,
     required this.review,
   });
+}
+
+class _SellerInfoSheet extends StatelessWidget {
+  final String sellerName;
+  final String sellerLocation;
+
+  const _SellerInfoSheet({
+    required this.sellerName,
+    required this.sellerLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Store Information',
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.grey[50],
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.storefront_rounded,
+                        color: Colors.green,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sellerName,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Premium Seller',
+                            style: GoogleFonts.outfit(
+                              color: Colors.green[700],
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _InfoRow(
+                  icon: Icons.location_on_rounded,
+                  label: 'Address',
+                  value: sellerLocation,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _InfoRow(
+                        icon: Icons.phone_rounded,
+                        label: 'Contact Number',
+                        value: '+977-1-4123456',
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Opening messaging app...'),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        );
+                      },
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.green.withValues(alpha: 0.1),
+                        foregroundColor: Colors.green[700],
+                      ),
+                      icon: const Icon(Icons.message_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.green[700],
+                      side: BorderSide(color: Colors.green[700]!),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'Close',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: [
+        Icon(icon, color: Colors.green[700], size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _ReviewCard extends StatelessWidget {

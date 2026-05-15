@@ -23,9 +23,9 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
 
     for (var dbOrder in dbOrders) {
       // Fetch items for this order
-      final dbItems = await (_db.select(_db.orderItemsTable)
-            ..where((t) => t.orderId.equals(dbOrder.id)))
-          .get();
+      final dbItems = await (_db.select(
+        _db.orderItemsTable,
+      )..where((t) => t.orderId.equals(dbOrder.id))).get();
 
       final items = dbItems
           .map(
@@ -59,6 +59,8 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
         rating: dbOrder.rating,
         comment: dbOrder.comment,
         placedAt: dbOrder.placedAt,
+        pausedAt: null,
+        pausedSeconds: 0,
       );
 
       loadedOrders.add(order);
@@ -93,6 +95,8 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
       orderDate: now,
       status: OrderStatus.pending,
       placedAt: now,
+      pausedAt: null,
+      pausedSeconds: 0,
     );
 
     state = [order, ...state];
@@ -128,53 +132,57 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
 
   void _startStatusTimer(OrderModel initialOrder) {
     _tickTimers[initialOrder.id]?.cancel();
-    _tickTimers[initialOrder.id] = Timer.periodic(
-      const Duration(seconds: 1),
-      (t) async {
-        if (!mounted) {
-          t.cancel();
-          return;
-        }
+    _tickTimers[initialOrder.id] = Timer.periodic(const Duration(seconds: 1), (
+      t,
+    ) async {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
 
-        // Find current state of this order
-        final currentOrder = state.firstWhere((o) => o.id == initialOrder.id);
-        if (currentOrder.status == OrderStatus.cancelled ||
-            currentOrder.status == OrderStatus.delivered) {
-          t.cancel();
-          return;
-        }
+      // Find current state of this order
+      final currentOrder = state.firstWhere((o) => o.id == initialOrder.id);
+      if (currentOrder.status == OrderStatus.cancelled ||
+          currentOrder.status == OrderStatus.delivered) {
+        t.cancel();
+        return;
+      }
 
-        final elapsed = DateTime.now().difference(currentOrder.placedAt).inSeconds;
+      if (currentOrder.isPaused) {
+        state = [...state];
+        return;
+      }
 
-        // Advance status based on elapsed time.
-        // The 10s cancellation window is the first phase; delivery phases begin at 10s.
-        // Full cycle: pending(0-10s) → packing(10-25s) → sentToSeller(25-37s)
-        //             → outForDelivery(37-50s) → delivered(50s+)
-        OrderStatus newStatus = currentOrder.status;
-        if (elapsed >= 50) {
-          newStatus = OrderStatus.delivered;
-          t.cancel();
-        } else if (elapsed >= 37) {
-          newStatus = OrderStatus.outForDelivery;
-        } else if (elapsed >= 25) {
-          newStatus = OrderStatus.sentToSeller;
-        } else if (elapsed >= 10) {
-          // Transition to packing the exact moment the cancellation window expires.
-          newStatus = OrderStatus.packing;
-        }
+      final elapsed = currentOrder.elapsedSeconds;
 
-        if (newStatus != currentOrder.status) {
-          await _db.updateOrderStatus(currentOrder.id, newStatus.index);
-          state = state.map((o) {
-            if (o.id == currentOrder.id) return o.copyWith(status: newStatus);
-            return o;
-          }).toList();
-        } else {
-          // Force state update to refresh UI animations (pulsing badges, countdowns)
-          state = [...state];
-        }
-      },
-    );
+      // Advance status based on elapsed time.
+      // The 10s cancellation window is the first phase; delivery phases begin at 10s.
+      // Full cycle: pending(0-10s) → packing(10-25s) → sentToSeller(25-37s)
+      //             → outForDelivery(37-50s) → delivered(50s+)
+      OrderStatus newStatus = currentOrder.status;
+      if (elapsed >= 50) {
+        newStatus = OrderStatus.delivered;
+        t.cancel();
+      } else if (elapsed >= 37) {
+        newStatus = OrderStatus.outForDelivery;
+      } else if (elapsed >= 25) {
+        newStatus = OrderStatus.sentToSeller;
+      } else if (elapsed >= 10) {
+        // Transition to packing the exact moment the cancellation window expires.
+        newStatus = OrderStatus.packing;
+      }
+
+      if (newStatus != currentOrder.status) {
+        await _db.updateOrderStatus(currentOrder.id, newStatus.index);
+        state = state.map((o) {
+          if (o.id == currentOrder.id) return o.copyWith(status: newStatus);
+          return o;
+        }).toList();
+      } else {
+        // Force state update to refresh UI animations (pulsing badges, countdowns)
+        state = [...state];
+      }
+    });
   }
 
   Future<void> cancelOrder(String orderId, String reason) async {
@@ -194,6 +202,32 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
           status: OrderStatus.cancelled,
           cancelledAt: now,
           cancellationReason: reason,
+          clearPausedAt: true,
+        );
+      }
+      return order;
+    }).toList();
+  }
+
+  void pauseOrder(String orderId) {
+    state = state.map((order) {
+      if (order.id == orderId &&
+          !order.isPaused &&
+          order.status == OrderStatus.pending) {
+        return order.copyWith(pausedAt: DateTime.now());
+      }
+      return order;
+    }).toList();
+  }
+
+  void resumeOrder(String orderId) {
+    state = state.map((order) {
+      if (order.id == orderId && order.isPaused) {
+        final now = DateTime.now();
+        final currentPaused = now.difference(order.pausedAt!).inSeconds;
+        return order.copyWith(
+          clearPausedAt: true,
+          pausedSeconds: order.pausedSeconds + currentPaused,
         );
       }
       return order;
@@ -208,13 +242,20 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
     await _db.updateOrderFeedback(orderId, rating, comment);
     state = state.map((order) {
       if (order.id == orderId) {
-        return order.copyWith(
-          rating: rating,
-          comment: comment,
-        );
+        return order.copyWith(rating: rating, comment: comment);
       }
       return order;
     }).toList();
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    await _db.deleteOrder(orderId);
+    state = state.where((order) => order.id != orderId).toList();
+  }
+
+  Future<void> deleteAllCompletedOrders() async {
+    await _db.deleteOrdersByStatus(OrderStatus.delivered.index);
+    state = state.where((order) => order.status != OrderStatus.delivered).toList();
   }
 
   @override
@@ -226,7 +267,9 @@ class OrderNotifier extends StateNotifier<List<OrderModel>> {
   }
 }
 
-final orderProvider = StateNotifierProvider<OrderNotifier, List<OrderModel>>((ref) {
+final orderProvider = StateNotifierProvider<OrderNotifier, List<OrderModel>>((
+  ref,
+) {
   final db = ref.watch(databaseProvider);
   return OrderNotifier(db);
 });

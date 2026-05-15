@@ -1,7 +1,14 @@
 import 'package:eco_bazzar_hub/features/cart/domain/models/cart_item.dart';
 import 'package:equatable/equatable.dart';
 
-enum OrderStatus { pending, packing, sentToSeller, outForDelivery, delivered, cancelled }
+enum OrderStatus {
+  pending,
+  packing,
+  sentToSeller,
+  outForDelivery,
+  delivered,
+  cancelled,
+}
 
 class OrderModel extends Equatable {
   final String id;
@@ -17,8 +24,14 @@ class OrderModel extends Equatable {
   final int? rating;
   final String? comment;
 
-  /// The exact moment the order was placed — used for the 10s cancellation window.
+  /// When the order was placed – used for the 10s cancellation window.
   final DateTime placedAt;
+
+  /// When the cancellation dialog paused the order timer.
+  final DateTime? pausedAt;
+
+  /// Total seconds the order has been paused so far.
+  final int pausedSeconds;
 
   const OrderModel({
     required this.id,
@@ -34,6 +47,8 @@ class OrderModel extends Equatable {
     this.rating,
     this.comment,
     DateTime? placedAt,
+    this.pausedAt,
+    this.pausedSeconds = 0,
   }) : placedAt = placedAt ?? orderDate;
 
   OrderModel copyWith({
@@ -50,6 +65,9 @@ class OrderModel extends Equatable {
     int? rating,
     String? comment,
     DateTime? placedAt,
+    DateTime? pausedAt,
+    int? pausedSeconds,
+    bool clearPausedAt = false,
   }) {
     return OrderModel(
       id: id ?? this.id,
@@ -65,12 +83,26 @@ class OrderModel extends Equatable {
       rating: rating ?? this.rating,
       comment: comment ?? this.comment,
       placedAt: placedAt ?? this.placedAt,
+      pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
+      pausedSeconds: pausedSeconds ?? this.pausedSeconds,
     );
+  }
+
+  bool get isPaused => pausedAt != null;
+
+  int get elapsedSeconds {
+    final now = DateTime.now();
+    final totalElapsed = now.difference(placedAt).inSeconds;
+    final currentPaused = pausedAt == null
+        ? 0
+        : now.difference(pausedAt!).inSeconds;
+    final adjusted = totalElapsed - pausedSeconds - currentPaused;
+    return adjusted < 0 ? 0 : adjusted;
   }
 
   /// Seconds remaining in the cancellation window (0 when expired).
   int get cancelSecondsLeft {
-    final elapsed = DateTime.now().difference(placedAt).inSeconds;
+    final elapsed = elapsedSeconds;
     final remaining = 10 - elapsed;
     return remaining < 0 ? 0 : remaining;
   }
@@ -79,18 +111,20 @@ class OrderModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        items,
-        totalAmount,
-        subtotal,
-        taxAmount,
-        discountAmount,
-        orderDate,
-        status,
-        cancelledAt,
-        cancellationReason,
-        rating,
-        comment,
-        placedAt,
-      ];
+    id,
+    items,
+    totalAmount,
+    subtotal,
+    taxAmount,
+    discountAmount,
+    orderDate,
+    status,
+    cancelledAt,
+    cancellationReason,
+    rating,
+    comment,
+    placedAt,
+    pausedAt,
+    pausedSeconds,
+  ];
 }
