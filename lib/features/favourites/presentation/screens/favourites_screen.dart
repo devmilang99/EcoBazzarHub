@@ -54,63 +54,90 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(64),
+              preferredSize: const Size.fromHeight(80),
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[900] : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color:
-                          isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search_rounded,
-                          color: Colors.grey[500], size: 22),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (val) =>
-                              setState(() => _searchQuery = val),
-                          onTapOutside: (_) =>
-                              FocusScope.of(context).unfocus(),
-                          decoration: InputDecoration(
-                            hintText: 'Search favourites...',
-                            hintStyle: GoogleFonts.outfit(
-                              color: Colors.grey[500],
-                              fontSize: 14,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[900] : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                            border: InputBorder.none,
-                            isDense: true,
+                          ],
+                          border: Border.all(
+                            color:
+                                isDark ? Colors.grey[800]! : Colors.grey[200]!,
                           ),
-                          style: GoogleFonts.outfit(fontSize: 14),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Center(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (val) =>
+                                setState(() => _searchQuery = val),
+                            onTapOutside: (_) =>
+                                FocusScope.of(context).unfocus(),
+                            decoration: InputDecoration(
+                              hintText: 'Search favourites...',
+                              hintStyle: GoogleFonts.outfit(
+                                color: Colors.grey[500],
+                                fontSize: 15,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: Colors.green[700],
+                                size: 22,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                            ),
+                            style: GoogleFonts.outfit(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
-                      if (_searchQuery.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                          child:
-                              Icon(Icons.close, color: Colors.grey, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        // Optional: implement filter for favorites if needed
+                      },
+                      child: Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[850] : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color:
+                                isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                            width: 1,
+                          ),
                         ),
-                    ],
-                  ),
+                        child: Center(
+                          child: Icon(
+                            Icons.tune_rounded,
+                            color: Colors.green[700],
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

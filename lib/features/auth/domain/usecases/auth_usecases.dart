@@ -54,3 +54,12 @@ class ResetPasswordUseCase {
     return repository.resetPassword(email);
   }
 }
+
+class SignOutUseCase {
+  final IAuthRepository repository;
+  SignOutUseCase(this.repository);
+
+  Future<void> execute() {
+    return repository.signOut();
+  }
+}

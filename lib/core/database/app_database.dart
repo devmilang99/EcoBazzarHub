@@ -172,6 +172,16 @@ class AppDatabase extends _$AppDatabase {
       await (delete(orders)..where((t) => t.status.equals(status))).go();
     });
   }
+
+  /// Clears all data from all tables in the database.
+  Future<void> clearAllData() async {
+    await transaction(() async {
+      await delete(appSettings).go();
+      await delete(cartItems).go();
+      await delete(orderItemsTable).go();
+      await delete(orders).go();
+    });
+  }
 }
 
 QueryExecutor _openConnection() {

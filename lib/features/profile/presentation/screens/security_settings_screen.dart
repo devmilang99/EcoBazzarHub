@@ -15,8 +15,6 @@ class SecuritySettingsScreen extends StatefulWidget {
 }
 
 class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
-  final bool _biometricEnabled = true;
-  final bool _twoFactorEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -196,36 +194,5 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
     ).animate().fadeIn().slideX(begin: 0.05, end: 0);
   }
 
-  Widget _buildToggleTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required bool isDark,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue[700], size: 24),
-        title: Text(
-          title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-        ),
-        trailing: Switch.adaptive(
-          value: value,
-          onChanged: onChanged,
-          activeColor: Colors.blue[700],
-        ),
-      ),
-    ).animate().fadeIn().slideX(begin: 0.05, end: 0);
   }
-}
+

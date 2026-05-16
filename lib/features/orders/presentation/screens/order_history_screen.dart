@@ -858,8 +858,8 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: StatefulBuilder(
           builder: (context, setDialogState) => AlertDialog(
             title: Text(
@@ -875,18 +875,22 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                   style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
-                ...reasons.map(
-                  (reason) => RadioListTile<String>(
-                    title: Text(
-                      reason,
-                      style: GoogleFonts.outfit(fontSize: 14),
-                    ),
-                    value: reason,
-                    groupValue: selectedReason,
-                    activeColor: Colors.red,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (val) =>
-                        setDialogState(() => selectedReason = val),
+                RadioGroup<String>(
+                  groupValue: selectedReason,
+                  onChanged: (val) =>
+                      setDialogState(() => selectedReason = val),
+                  child: Column(
+                    children: reasons.map(
+                      (reason) => RadioListTile<String>(
+                        title: Text(
+                          reason,
+                          style: GoogleFonts.outfit(fontSize: 14),
+                        ),
+                        value: reason,
+                        activeColor: Colors.red,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ).toList(),
                   ),
                 ),
               ],
@@ -909,7 +913,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         await ref
                             .read(orderProvider.notifier)
                             .cancelOrder(order.id, selectedReason!);
-                        Navigator.pop(context);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,

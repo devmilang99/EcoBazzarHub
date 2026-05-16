@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eco_bazzar_hub/features/auth/domain/entities/user_entity.dart';
 import 'package:eco_bazzar_hub/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:eco_bazzar_hub/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:eco_bazzar_hub/core/database/app_database.dart';
+import 'package:eco_bazzar_hub/core/providers.dart';
 
 class AuthState {
   final UserEntity? user;
@@ -39,6 +41,9 @@ final getCurrentUserUseCaseProvider = Provider(
 final resetPasswordUseCaseProvider = Provider(
   (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
+final signOutUseCaseProvider = Provider(
+  (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
+);
 
 // StateNotifier is definitely in flutter_riverpod
 class AuthViewModel extends StateNotifier<AuthState> {
@@ -48,6 +53,8 @@ class AuthViewModel extends StateNotifier<AuthState> {
   final GoogleSilentSignInUseCase _googleSilentSignInUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final ResetPasswordUseCase _resetPasswordUseCase;
+  final SignOutUseCase _signOutUseCase;
+  final AppDatabase _database;
 
   AuthViewModel({
     required LoginUseCase loginUseCase,
@@ -56,12 +63,16 @@ class AuthViewModel extends StateNotifier<AuthState> {
     required GoogleSilentSignInUseCase googleSilentSignInUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required ResetPasswordUseCase resetPasswordUseCase,
+    required SignOutUseCase signOutUseCase,
+    required AppDatabase database,
   }) : _loginUseCase = loginUseCase,
        _signUpUseCase = signUpUseCase,
        _googleSignInUseCase = googleSignInUseCase,
        _googleSilentSignInUseCase = googleSilentSignInUseCase,
        _getCurrentUserUseCase = getCurrentUserUseCase,
        _resetPasswordUseCase = resetPasswordUseCase,
+       _signOutUseCase = signOutUseCase,
+       _database = database,
        super(AuthState());
 
   Future<void> login(String email, String password) async {
@@ -124,8 +135,15 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
-  void logout() {
-    state = AuthState();
+  Future<void> logout() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _signOutUseCase.execute();
+      await _database.clearAllData();
+      state = AuthState(user: null, isLoading: false, error: null);
+    } catch (e) {
+      state = AuthState(user: null, isLoading: false, error: e.toString());
+    }
   }
 }
 
@@ -139,5 +157,7 @@ final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
     googleSilentSignInUseCase: ref.watch(googleSilentSignInUseCaseProvider),
     getCurrentUserUseCase: ref.watch(getCurrentUserUseCaseProvider),
     resetPasswordUseCase: ref.watch(resetPasswordUseCaseProvider),
+    signOutUseCase: ref.watch(signOutUseCaseProvider),
+    database: ref.watch(databaseProvider),
   );
 });

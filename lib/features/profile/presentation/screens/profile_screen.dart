@@ -8,6 +8,7 @@ import 'package:eco_bazzar_hub/features/profile/presentation/screens/support_hel
 import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -87,9 +88,9 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                           ),
                         ).animate().scale(
-                              duration: 600.ms,
-                              curve: Curves.easeOutBack,
-                            ),
+                          duration: 600.ms,
+                          curve: Curves.easeOutBack,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           userName,
@@ -148,8 +149,9 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 12),
                     _buildStatsRow(isDark),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 22),
 
                     // Account Hub Section
                     _buildSectionHeader('Account Hub'),
@@ -201,7 +203,8 @@ class ProfileScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const DeactivateAccountScreen()),
+                            builder: (_) => const DeactivateAccountScreen(),
+                          ),
                         );
                       },
                       isDark: isDark,
@@ -215,11 +218,17 @@ class ProfileScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const DeleteAccountScreen()),
+                            builder: (_) => const DeleteAccountScreen(),
+                          ),
                         );
                       },
                       isDark: isDark,
                     ),
+
+                    const SizedBox(height: 32),
+                    // Logout Action
+                    _buildLogoutItem(context, ref, isDark),
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),
@@ -227,61 +236,78 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _buildFixedLogoutCard(context, ref, isDark),
     );
   }
 
-  Widget _buildFixedLogoutCard(
-    BuildContext context,
-    WidgetRef ref,
-    bool isDark,
-  ) {
+  Widget _buildLogoutItem(BuildContext context, WidgetRef ref, bool isDark) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      color: Colors.transparent,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _showLogoutDialog(context, ref),
-            borderRadius: BorderRadius.circular(24),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.redAccent.withValues(alpha: isDark ? 0.1 : 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showLogoutDialog(context, ref),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
                     Icons.logout_rounded,
                     color: Colors.redAccent,
                     size: 22,
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Sign Out from Account',
-                    style: GoogleFonts.outfit(
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sign Out',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      Text(
+                        'Sign out from your account safely',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.redAccent.withValues(alpha: 0.5),
+                  size: 20,
+                ),
+              ],
             ),
           ),
         ),
-      ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
-    );
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.05, end: 0);
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
@@ -361,7 +387,7 @@ class ProfileScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => context.goNamed('login'),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
@@ -383,20 +409,16 @@ class ProfileScreen extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {
-                                  ref
+                                onPressed: () async {
+                                  await ref
                                       .read(authViewModelProvider.notifier)
                                       .logout();
                                   ref
-                                          .read(dashboardIndexProvider.notifier)
-                                          .state =
-                                      0;
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                      builder: (_) => const LoginScreen(),
-                                    ),
-                                    (route) => false,
-                                  );
+                                      .read(dashboardIndexProvider.notifier)
+                                      .state = 0;
+                                  if (context.mounted) {
+                                    context.go('/login');
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red[600],
@@ -508,7 +530,12 @@ class ProfileScreen extends ConsumerWidget {
     return Row(
       children: [
         _buildStatItem('Orders', '12', Icons.shopping_bag_outlined, isDark),
-        _buildStatItem('Vouchers', '4', Icons.confirmation_number_outlined, isDark),
+        _buildStatItem(
+          'Vouchers',
+          '4',
+          Icons.confirmation_number_outlined,
+          isDark,
+        ),
         _buildStatItem('Points', '850', Icons.stars_outlined, isDark),
       ],
     );
@@ -535,7 +562,9 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ],
           border: Border.all(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.transparent,
           ),
         ),
         child: Column(
@@ -570,5 +599,4 @@ class ProfileScreen extends ConsumerWidget {
       ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
     );
   }
-
 }

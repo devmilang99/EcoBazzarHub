@@ -83,7 +83,7 @@ class _BiometricSettingsScreenState extends State<BiometricSettingsScreen> {
         leading: Icon(icon, color: Colors.blue[700]),
         title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-        trailing: Switch.adaptive(value: value, onChanged: onChanged, activeColor: Colors.blue[700]),
+        trailing: Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: Colors.blue[700]),
       ),
     );
   }

@@ -83,7 +83,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               ],
             ),
           ),
-          Switch.adaptive(value: value, onChanged: onChanged, activeColor: Colors.white, activeTrackColor: Colors.white.withValues(alpha: 0.3)),
+          Switch.adaptive(value: value, onChanged: onChanged, activeThumbColor: Colors.white, activeTrackColor: Colors.white.withValues(alpha: 0.3)),
         ],
       ),
     );
@@ -99,7 +99,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       child: ListTile(
         title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-        trailing: Switch.adaptive(value: value, onChanged: onChanged, activeColor: Colors.green[700]),
+        trailing: Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: Colors.green[700]),
       ),
     ).animate().fadeIn().slideX();
   }

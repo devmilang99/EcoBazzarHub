@@ -9,7 +9,6 @@ class AuthRepositoryImpl implements IAuthRepository {
   // For Android, Google Sign-In usually finds the configuration automatically.
   // However, on some environments or for specific features, providing the webClientId (client_type: 3) is required.
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    // Get this from google-services.json (client_type: 3)
     serverClientId:
         '951552864785-ds2sh0mf6boaqjl2olmib7ot47uqf5en.apps.googleusercontent.com',
   );
@@ -44,17 +43,36 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<UserEntity?> signInWithGoogle() async {
     try {
+      // Ensure a completely fresh state before showing the picker.
+      // We try to disconnect first to clear any cached session that might persist.
+      try {
+        await _auth.signOut();
+        await _googleSignIn.signOut();
+        await _googleSignIn.disconnect();
+      } catch (_) {
+        // Ignore errors during initial cleanup
+      }
+      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+          
+      if (googleAuth.idToken == null && googleAuth.accessToken == null) {
+        throw Exception('Google Authentication failed: Missing tokens. Please check your Firebase/Google Console configuration.');
+      }
+
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
+      if (userCredential.user == null) {
+        throw Exception('Firebase Sign-In failed: No user returned after credential verification.');
+      }
+      
       return _mapFirebaseUserToEntity(userCredential.user);
     } catch (e) {
       if (e.toString().contains('sign_in_failed')) {
@@ -63,7 +81,10 @@ class AuthRepositoryImpl implements IAuthRepository {
           'Please ensure you have added your debug and release SHA-1 keys to the Firebase project settings.',
         );
       }
-      rethrow;
+      if (e is FirebaseAuthException) {
+        throw Exception('Firebase Auth Error (${e.code}): ${e.message}');
+      }
+      throw Exception('Sign-in error: ${e.toString()}');
     }
   }
 
@@ -95,8 +116,14 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _auth.signOut();
-    await _googleSignIn.signOut();
+    try {
+      await _auth.signOut();
+      await _googleSignIn.signOut();
+      // Disconnect helps ensure a fresh account picker and clears cached tokens more thoroughly
+      await _googleSignIn.disconnect();
+    } catch (_) {
+      // Ignore errors during sign-out/disconnect if already signed out
+    }
   }
 
   @override

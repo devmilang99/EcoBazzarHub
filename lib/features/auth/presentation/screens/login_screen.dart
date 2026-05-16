@@ -24,9 +24,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadSavedEmail();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _attemptAutoLogin();
-    });
   }
 
   Future<void> _loadSavedEmail() async {
@@ -53,15 +50,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _attemptAutoLogin() async {
-    await ref.read(authViewModelProvider.notifier).tryAutoLogin();
-    final authState = ref.read(authViewModelProvider);
-
-    if (!mounted) return;
-    if (authState.user != null) {
-      context.go('/home');
-    }
-  }
 
   @override
   void dispose() {
@@ -80,13 +68,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
 
       if (next.user != null) {
-        if (mounted) context.go('/home');
+        if (mounted) {
+          Future.microtask(() {
+            if (context.mounted) context.go('/home');
+          });
+        }
       }
       if (next.error != null && next.error != previous?.error) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(next.error!)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.error!),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       }
     });
