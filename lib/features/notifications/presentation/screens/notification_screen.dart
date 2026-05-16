@@ -1,79 +1,16 @@
+import 'package:eco_bazzar_hub/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class NotificationModel {
-  final String id;
-  final String title;
-  final String message;
-  final DateTime timestamp;
-  final bool isRead;
-  final IconData icon;
-  final Color iconBgColor;
-
-  NotificationModel({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.timestamp,
-    this.isRead = false,
-    required this.icon,
-    required this.iconBgColor,
-  });
-}
-
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends ConsumerWidget {
   const NotificationScreen({super.key});
 
-  static final List<NotificationModel> _mockNotifications = [
-    NotificationModel(
-      id: '1',
-      title: 'Order Delivered',
-      message: 'Your order #12345 has been delivered successfully. Enjoy your eco-friendly products!',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-      icon: Icons.local_shipping_rounded,
-      iconBgColor: Colors.green,
-    ),
-    NotificationModel(
-      id: '2',
-      title: 'Flash Sale Alert!',
-      message: 'Exclusive 20% off on all organic vegetables for the next 2 hours. Don\'t miss out!',
-      timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      icon: Icons.flash_on_rounded,
-      iconBgColor: Colors.amber,
-    ),
-    NotificationModel(
-      id: '3',
-      title: 'Payment Successful',
-      message: 'We have received your payment of Rs.45.00 for your latest purchase.',
-      timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-      icon: Icons.account_balance_wallet_rounded,
-      iconBgColor: Colors.blue,
-      isRead: true,
-    ),
-    NotificationModel(
-      id: '4',
-      title: 'Price Drop',
-      message: 'An item in your wishlist "Reusable Water Bottle" is now 10% cheaper.',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-      icon: Icons.trending_down_rounded,
-      iconBgColor: Colors.purple,
-      isRead: true,
-    ),
-    NotificationModel(
-      id: '5',
-      title: 'New Eco Tip',
-      message: 'Did you know? Switching to LED bulbs can save up to 75% more energy.',
-      timestamp: DateTime.now().subtract(const Duration(days: 2)),
-      icon: Icons.tips_and_updates_rounded,
-      iconBgColor: Colors.teal,
-      isRead: true,
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final notifications = ref.watch(notificationProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -89,20 +26,21 @@ class NotificationScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         foregroundColor: isDark ? Colors.white : Colors.black,
         actions: [
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'Mark all read',
-              style: GoogleFonts.outfit(
-                color: Colors.green[700],
-                fontWeight: FontWeight.w600,
+          if (notifications.isNotEmpty)
+            TextButton(
+              onPressed: () => ref.read(notificationProvider.notifier).markAllAsRead(),
+              child: Text(
+                'Mark all read',
+                style: GoogleFonts.outfit(
+                  color: Colors.green[700],
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
           const SizedBox(width: 8),
         ],
       ),
-      body: _mockNotifications.isEmpty
+      body: notifications.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -125,20 +63,52 @@ class NotificationScreen extends StatelessWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _mockNotifications.length,
+              itemCount: notifications.length,
               itemBuilder: (context, index) {
-                final notification = _mockNotifications[index];
-                return _NotificationTile(notification: notification)
-                    .animate()
-                    .fadeIn(delay: Duration(milliseconds: 100 * index))
-                    .slideX(begin: 0.1, end: 0);
+                final notification = notifications[index];
+                return Dismissible(
+                  key: Key(notification.id),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    ref
+                        .read(notificationProvider.notifier)
+                        .deleteNotification(notification.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Notification deleted'),
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            // Logic to undo could be added here if needed
+                          },
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(Icons.delete_outline, color: Colors.white),
+                  ),
+                  child: _NotificationTile(notification: notification)
+                      .animate()
+                      .fadeIn(delay: Duration(milliseconds: 100 * index))
+                      .slideX(begin: 0.1, end: 0),
+                );
               },
             ),
     );
   }
 }
 
-class _NotificationTile extends StatelessWidget {
+class _NotificationTile extends ConsumerWidget {
   final NotificationModel notification;
   const _NotificationTile({required this.notification});
 
@@ -150,7 +120,7 @@ class _NotificationTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -212,7 +182,9 @@ class _NotificationTile extends StatelessWidget {
             ),
           ),
         ),
-        onTap: () {},
+        onTap: () {
+          ref.read(notificationProvider.notifier).markAsRead(notification.id);
+        },
       ),
     );
   }

@@ -82,22 +82,48 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
         actions: [
           if (_tabController.index == 1 && completedOrders.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.delete_sweep_rounded, color: isDark ? Colors.white : Colors.black87),
+              icon: Icon(
+                Icons.delete_sweep_rounded,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
               onPressed: () async {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text('Delete All Completed Orders', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                    content: Text('Are you sure you want to clear your completed order history?', style: GoogleFonts.outfit()),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    title: Text(
+                      'Clear History',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                    ),
+                    content: Text(
+                      'Are you sure you want to clear your completed order history?',
+                      style: GoogleFonts.outfit(),
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.outfit(color: Colors.grey),
+                        ),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        onPressed: () => Navigator.pop(context, true), 
-                        child: Text('Delete All', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(
+                          'Clear All',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -182,23 +208,50 @@ class _OrderList extends ConsumerWidget {
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: const Icon(Icons.delete_outline, color: Colors.white, size: 32),
+              child: const Icon(
+                Icons.delete_outline,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
             confirmDismiss: (direction) async {
               return await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('Delete Order', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                  content: Text('Are you sure you want to delete this order from history?', style: GoogleFonts.outfit()),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  title: Text(
+                    'Delete Order',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    'Are you sure you want to delete this order from history?',
+                    style: GoogleFonts.outfit(),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.outfit(color: Colors.grey),
+                      ),
                     ),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                      onPressed: () => Navigator.pop(context, true), 
-                      child: Text('Delete', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(
+                        'Delete',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

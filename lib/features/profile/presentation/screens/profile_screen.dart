@@ -1,7 +1,11 @@
 import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/screens/login_screen.dart';
+import 'package:eco_bazzar_hub/features/profile/presentation/screens/deactivate_account_screen.dart';
+import 'package:eco_bazzar_hub/features/profile/presentation/screens/delete_account_screen.dart';
+import 'package:eco_bazzar_hub/features/profile/presentation/screens/profile_settings_screen.dart';
+import 'package:eco_bazzar_hub/features/profile/presentation/screens/security_settings_screen.dart';
+import 'package:eco_bazzar_hub/features/profile/presentation/screens/support_help_screen.dart';
 import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:eco_bazzar_hub/features/favourites/presentation/screens/favourites_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,9 +26,10 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.grey[50],
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: 320,
             pinned: true,
             stretch: true,
             backgroundColor: Colors.green[800],
@@ -38,45 +43,88 @@ class ProfileScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Colors.green[900]!, Colors.green[600]!],
+                        colors: [
+                          isDark ? Colors.green[900]! : Colors.green[800]!,
+                          isDark ? Colors.black : Colors.green[500]!,
+                        ],
                       ),
                     ),
                   ),
                   Positioned(
-                    bottom: 40,
+                    top: -50,
+                    right: -50,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 60,
                     left: 0,
                     right: 0,
                     child: Column(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              width: 2,
+                            ),
                           ),
                           child: CircleAvatar(
-                            radius: 55,
+                            radius: 50,
                             backgroundImage: userPhoto != null
                                 ? NetworkImage(userPhoto)
                                 : const NetworkImage(
-                                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop'),
+                                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop',
+                                  ),
                           ),
-                        ).animate().scale(duration: 600.ms),
+                        ).animate().scale(
+                              duration: 600.ms,
+                              curve: Curves.easeOutBack,
+                            ),
                         const SizedBox(height: 16),
                         Text(
                           userName,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
-                            fontSize: 26,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           userEmail,
                           style: GoogleFonts.outfit(
-                            color: Colors.white70,
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 14,
                             letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Gold Member',
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
                           ),
                         ),
                       ],
@@ -88,83 +136,90 @@ class ProfileScreen extends ConsumerWidget {
           ),
           SliverToBoxAdapter(
             child: Container(
-              transform: Matrix4.translationValues(0, -20, 0),
+              transform: Matrix4.translationValues(0, -30, 0),
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.grey[50],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30),
+                ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 30, 20, 150),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('My Activity'),
-                    const SizedBox(height: 16),
-                    _buildActivityCards(ref),
+                    _buildStatsRow(isDark),
                     const SizedBox(height: 32),
-                    _buildSectionTitle('Account Settings'),
-                    const SizedBox(height: 12),
+
+                    // Account Hub Section
+                    _buildSectionHeader('Account Hub'),
                     _buildProfileItem(
-                      icon: Icons.person_outline_rounded,
-                      title: 'Edit Profile',
-                      onTap: () {},
+                      icon: Icons.settings_outlined,
+                      title: 'Profile Settings',
+                      subtitle: 'Personal details, addresses, preferences',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSettingsScreen(),
+                        ),
+                      ),
                       isDark: isDark,
                     ),
                     _buildProfileItem(
-                      icon: Icons.location_on_outlined,
-                      title: 'Shipping Address',
-                      onTap: () {},
-                      isDark: isDark,
-                    ),
-                    _buildProfileItem(
-                      icon: Icons.payment_outlined,
-                      title: 'Payment Methods',
-                      onTap: () {},
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Preferences'),
-                    const SizedBox(height: 12),
-                    _buildProfileItem(
-                      icon: Icons.notifications_none_rounded,
-                      title: 'Notifications',
-                      onTap: () {},
-                      isDark: isDark,
-                    ),
-                    _buildProfileItem(
-                      icon: Icons.security_outlined,
-                      title: 'Security',
-                      onTap: () {},
+                      icon: Icons.shield_outlined,
+                      title: 'Security Settings',
+                      subtitle: 'Password, biometrics, active sessions',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SecuritySettingsScreen(),
+                        ),
+                      ),
                       isDark: isDark,
                     ),
                     _buildProfileItem(
                       icon: Icons.help_outline_rounded,
-                      title: 'Help Center',
-                      onTap: () {},
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 40),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton.icon(
-                        onPressed: () => _showLogoutDialog(context, ref),
-                        icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-                        label: Text(
-                          'Logout',
-                          style: GoogleFonts.outfit(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: Colors.redAccent.withValues(alpha: 0.05),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: 'Support & Help',
+                      subtitle: 'FAQ, live chat, platform guides',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SupportHelpScreen(),
                         ),
                       ),
+                      isDark: isDark,
                     ),
-                    const SizedBox(height: 120),
+
+                    const SizedBox(height: 24),
+                    // Account Actions Section
+                    _buildSectionHeader('Account Actions'),
+                    _buildProfileItem(
+                      icon: Icons.no_accounts_outlined,
+                      title: 'Deactivate Account',
+                      subtitle: 'Temporarily disable your profile',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const DeactivateAccountScreen()),
+                        );
+                      },
+                      isDark: isDark,
+                    ),
+                    _buildProfileItem(
+                      icon: Icons.delete_forever_outlined,
+                      title: 'Delete Account',
+                      subtitle: 'Permanently remove your data',
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const DeleteAccountScreen()),
+                        );
+                      },
+                      isDark: isDark,
+                    ),
                   ],
                 ),
               ),
@@ -172,6 +227,60 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+      bottomNavigationBar: _buildFixedLogoutCard(context, ref, isDark),
+    );
+  }
+
+  Widget _buildFixedLogoutCard(
+    BuildContext context,
+    WidgetRef ref,
+    bool isDark,
+  ) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showLogoutDialog(context, ref),
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.logout_rounded,
+                    color: Colors.redAccent,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Sign Out from Account',
+                    style: GoogleFonts.outfit(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
     );
   }
 
@@ -192,7 +301,8 @@ class ProfileScreen extends ConsumerWidget {
             child: AlertDialog(
               backgroundColor: isDark ? Colors.grey[900] : Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28)),
+                borderRadius: BorderRadius.circular(28),
+              ),
               contentPadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -201,8 +311,9 @@ class ProfileScreen extends ConsumerWidget {
                     height: 100,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(28)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
                       gradient: LinearGradient(
                         colors: [Colors.red[700]!, Colors.red[400]!],
                         begin: Alignment.topLeft,
@@ -252,10 +363,10 @@ class ProfileScreen extends ConsumerWidget {
                               child: OutlinedButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: OutlinedButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
-                                  side:
-                                      BorderSide(color: Colors.grey[300]!),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  side: BorderSide(color: Colors.grey[300]!),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -276,10 +387,11 @@ class ProfileScreen extends ConsumerWidget {
                                   ref
                                       .read(authViewModelProvider.notifier)
                                       .logout();
-                                  // Reset dashboard index to avoid crash when tabs change
-                                  ref.read(dashboardIndexProvider.notifier).state = 0;
-                                  Navigator.of(context)
-                                      .pushAndRemoveUntil(
+                                  ref
+                                          .read(dashboardIndexProvider.notifier)
+                                          .state =
+                                      0;
+                                  Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(
                                       builder: (_) => const LoginScreen(),
                                     ),
@@ -289,8 +401,9 @@ class ProfileScreen extends ConsumerWidget {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red[600],
                                   foregroundColor: Colors.white,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -318,130 +431,144 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.outfit(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 0.5,
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Text(
+        title,
+        style: GoogleFonts.outfit(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+          letterSpacing: 1,
+        ),
       ),
-    );
-  }
-
-  Widget _buildActivityCards(WidgetRef ref) {
-    return Row(
-      children: [
-        _ActivityCard(
-          icon: Icons.shopping_bag_outlined,
-          label: 'Orders',
-          color: Colors.blue,
-          onTap: () => ref.read(dashboardIndexProvider.notifier).state = 2,
-        ),
-        const SizedBox(width: 16),
-        _ActivityCard(
-          icon: Icons.favorite_border_rounded,
-          label: 'Wishlist',
-          color: Colors.red,
-          onTap: () {
-            Navigator.push(
-              ref.context,
-              MaterialPageRoute(builder: (context) => const FavouritesScreen()),
-            );
-          },
-        ),
-        const SizedBox(width: 16),
-        _ActivityCard(
-          icon: Icons.star_outline_rounded,
-          label: 'Reviews',
-          color: Colors.amber,
-          onTap: () {},
-        ),
-      ],
     );
   }
 
   Widget _buildProfileItem({
     required IconData icon,
     required String title,
+    required String subtitle,
     required VoidCallback onTap,
     required bool isDark,
+    Color? color,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(icon, color: Colors.green[700]),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: (color ?? Colors.green).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color ?? Colors.green[700], size: 22),
+        ),
         title: Text(
           title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 15),
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            color: color ?? (isDark ? Colors.white : Colors.black87),
+          ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+        ),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: Colors.grey[400],
+          size: 20,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
-    ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.1, end: 0);
+    ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.05, end: 0);
   }
-}
 
-class _ActivityCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActivityCard({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.grey[900] : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: 30),
-              const SizedBox(height: 12),
-              Text(
-                label,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget _buildStatsRow(bool isDark) {
+    return Row(
+      children: [
+        _buildStatItem('Orders', '12', Icons.shopping_bag_outlined, isDark),
+        _buildStatItem('Vouchers', '4', Icons.confirmation_number_outlined, isDark),
+        _buildStatItem('Points', '850', Icons.stars_outlined, isDark),
+      ],
     );
   }
+
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    bool isDark,
+  ) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.green[700], size: 20),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1, end: 0),
+    );
+  }
+
 }

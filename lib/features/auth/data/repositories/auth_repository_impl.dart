@@ -106,11 +106,15 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   UserEntity? _mapFirebaseUserToEntity(User? user) {
     if (user == null) return null;
+    final isGoogleUser = user.providerData.any(
+      (info) => info.providerId == 'google.com',
+    );
     return UserEntity(
       id: user.uid,
       email: user.email ?? '',
       name: user.displayName,
       photoUrl: user.photoURL,
+      isGoogleUser: isGoogleUser,
     );
   }
 }

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:badges/badges.dart' as badges;
 
+
 final dashboardIndexProvider = StateProvider<int>((ref) => 0);
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(dashboardIndexProvider);
     final cartItemsCount = ref.watch(cartProvider).items.length;
+
     final orders = ref.watch(orderProvider);
     final activeOrdersCount = orders
         .where(
@@ -92,9 +94,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             clipBehavior: Clip.antiAlias,
             child: BottomNavigationBar(
               currentIndex: selectedIndex,
-              onTap:
-                  (index) =>
-                      ref.read(dashboardIndexProvider.notifier).state = index,
+              onTap: (index) =>
+                  ref.read(dashboardIndexProvider.notifier).state = index,
               backgroundColor: Colors.transparent,
               selectedItemColor: Colors.green[700],
               unselectedItemColor: isDark ? Colors.grey[500] : Colors.grey[500],
@@ -104,11 +105,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               type: BottomNavigationBarType.fixed,
               selectedLabelStyle: GoogleFonts.outfit(
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 10,
               ),
               unselectedLabelStyle: GoogleFonts.outfit(
                 fontWeight: FontWeight.normal,
-                fontSize: 11,
+                fontSize: 9,
               ),
               items: [
                 const BottomNavigationBarItem(
@@ -166,32 +167,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   ),
                   label: 'Orders',
                 ),
+
                 BottomNavigationBarItem(
-                  icon:
-                      userPhotoUrl != null
-                          ? CircleAvatar(
-                            radius: 13,
+                  icon: userPhotoUrl != null
+                      ? CircleAvatar(
+                          radius: 11,
+                          backgroundImage: NetworkImage(userPhotoUrl),
+                          backgroundColor: Colors.grey[300],
+                        )
+                      : const Icon(Icons.person_outline_rounded),
+                  activeIcon: userPhotoUrl != null
+                      ? Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.green[700]!,
+                              width: 2,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 11,
                             backgroundImage: NetworkImage(userPhotoUrl),
                             backgroundColor: Colors.grey[300],
-                          )
-                          : const Icon(Icons.person_outline_rounded),
-                  activeIcon:
-                      userPhotoUrl != null
-                          ? Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.green[700]!,
-                                width: 2,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 13,
-                              backgroundImage: NetworkImage(userPhotoUrl),
-                              backgroundColor: Colors.grey[300],
-                            ),
-                          )
-                          : const Icon(Icons.person_rounded),
+                          ),
+                        )
+                      : const Icon(Icons.person_rounded),
                   label: 'Profile',
                 ),
               ],

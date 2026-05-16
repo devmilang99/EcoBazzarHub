@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eco_bazzar_hub/core/providers.dart';
 import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -72,6 +73,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authViewModelProvider, (previous, next) {
+      if (next.isLoading && !(previous?.isLoading ?? false)) {
+        _showLoadingDialog(context);
+      } else if (!next.isLoading && (previous?.isLoading ?? false)) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
       if (next.user != null) {
         if (mounted) context.go('/home');
       }
@@ -464,6 +471,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            Text(
+              "Authenticating...",
+              style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Please wait while we verify your account.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }

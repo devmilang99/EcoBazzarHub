@@ -12,6 +12,7 @@ import 'package:eco_bazzar_hub/features/dashboard/presentation/screens/dashboard
 import 'package:eco_bazzar_hub/features/core/presentation/screens/location_selector_screen.dart';
 import 'package:eco_bazzar_hub/features/favourites/presentation/screens/favourites_screen.dart';
 import 'package:eco_bazzar_hub/features/notifications/presentation/screens/notification_screen.dart';
+import 'package:eco_bazzar_hub/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:badges/badges.dart' as badges;
 import '../viewmodels/home_viewmodel.dart';
 
@@ -28,6 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _autoSlideTimer;
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+  String _currentLocation = 'Kathmandu, Nepal';
 
   final List<String> _sliderImages = [
     'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop',
@@ -74,9 +76,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _showLocationPicker(BuildContext context) async {
     final selected = await LocationSelectorSheet.show(
       context,
-      'Kathmandu, Nepal',
+      _currentLocation,
     );
     if (selected != null && context.mounted) {
+      setState(() {
+        _currentLocation = selected;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Location updated to $selected'),
@@ -333,7 +338,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Kathmandu, Nepal',
+                        _currentLocation,
                         style: GoogleFonts.outfit(
                           fontSize: 12,
                           color: Colors.grey,
@@ -408,9 +413,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   );
                 },
-                icon: Icon(
-                  Icons.notifications_none_rounded,
-                  color: Theme.of(context).iconTheme.color,
+                icon: badges.Badge(
+                  showBadge: ref.watch(unreadNotificationsCountProvider) > 0,
+                  badgeContent: Text(
+                    ref.watch(unreadNotificationsCountProvider).toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                  badgeStyle: const badges.BadgeStyle(badgeColor: Colors.red),
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
