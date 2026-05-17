@@ -81,7 +81,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       final user = await _loginUseCase.execute(email, password);
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -91,7 +91,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       final user = await _signUpUseCase.execute(email, password, name);
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -101,7 +101,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       final user = await _googleSignInUseCase.execute();
       state = state.copyWith(user: user, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -131,7 +131,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
       await _resetPasswordUseCase.execute(email);
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -142,8 +142,26 @@ class AuthViewModel extends StateNotifier<AuthState> {
       await _database.clearAllData();
       state = AuthState(user: null, isLoading: false, error: null);
     } catch (e) {
-      state = AuthState(user: null, isLoading: false, error: e.toString());
+      state = AuthState(user: null, isLoading: false, error: _formatError(e));
     }
+  }
+
+  void clearError() {
+    state = state.copyWith(error: null);
+  }
+
+  String _formatError(dynamic e) {
+    final str = e.toString();
+    if (str.contains('user-not-found') || str.contains('invalid-credential') || str.contains('wrong-password')) {
+      return 'Invalid email or password. Please try again.';
+    }
+    if (str.contains('email-already-in-use')) {
+      return 'This email is already in use. Please try logging in instead.';
+    }
+    if (str.contains('network-request-failed')) {
+      return 'Network error. Please check your internet connection.';
+    }
+    return str.replaceAll('Exception: ', '').replaceAll(RegExp(r'\[.*?\]'), '').trim();
   }
 }
 

@@ -97,35 +97,73 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
                       'Clear History',
                       style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
                     ),
-                    content: Text(
-                      'Are you sure you want to clear your completed order history?',
-                      style: GoogleFonts.outfit(),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Are you sure you want to clear your completed order history?',
+                          style: GoogleFonts.outfit(),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Clear All History',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'This action cannot be undone',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                            ),
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(
+                              'Keep History',
+                              style: GoogleFonts.outfit(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text(
-                          'Cancel',
-                          style: GoogleFonts.outfit(color: Colors.grey),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context, true),
-                        child: Text(
-                          'Clear All',
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 );
                 if (confirm == true) {
@@ -225,35 +263,79 @@ class _OrderList extends ConsumerWidget {
                     'Delete Order',
                     style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
                   ),
-                  content: Text(
-                    'Are you sure you want to delete this order from history?',
-                    style: GoogleFonts.outfit(),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Are you sure you want to delete this order from history?',
+                        style: GoogleFonts.outfit(),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Delete Order',
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Remove from history forever',
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            side: BorderSide(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800]!
+                                  : Colors.grey[300]!,
+                            ),
+                          ),
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(
+                            'Keep Order',
+                            style: GoogleFonts.outfit(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.outfit(color: Colors.grey),
-                      ),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               );
             },
@@ -893,41 +975,83 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                     ).toList(),
                   ),
                 ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: selectedReason == null
+                        ? null
+                        : () async {
+                            await ref
+                                .read(orderProvider.notifier)
+                                .cancelOrder(order.id, selectedReason!);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Confirm Cancellation',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'This will cancel your order completely',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      ref.read(orderProvider.notifier).resumeOrder(order.id);
+                      Navigator.pop(context);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      side: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey[800]!
+                            : Colors.grey[300]!,
+                      ),
+                    ),
+                    child: Text(
+                      'Keep Order',
+                      style: GoogleFonts.outfit(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  ref.read(orderProvider.notifier).resumeOrder(order.id);
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'Keep Order',
-                  style: GoogleFonts.outfit(color: Colors.grey),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: selectedReason == null
-                    ? null
-                    : () async {
-                        await ref
-                            .read(orderProvider.notifier)
-                            .cancelOrder(order.id, selectedReason!);
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Confirm Cancellation',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -981,38 +1105,80 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                 ),
                 style: GoogleFonts.outfit(fontSize: 14),
               ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    ref
+                        .read(orderProvider.notifier)
+                        .updateOrderFeedback(
+                          order.id,
+                          rating,
+                          commentController.text,
+                        );
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[700],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Submit Review',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Share your thoughts with us',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    side: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[800]!
+                          : Colors.grey[300]!,
+                    ),
+                  ),
+                  child: Text(
+                    'Maybe Later',
+                    style: GoogleFonts.outfit(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Later',
-                style: GoogleFonts.outfit(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                ref
-                    .read(orderProvider.notifier)
-                    .updateOrderFeedback(
-                      order.id,
-                      rating,
-                      commentController.text,
-                    );
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[700],
-                foregroundColor: Colors.white,
-                elevation: 0,
-              ),
-              child: Text(
-                'Submit Review',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),

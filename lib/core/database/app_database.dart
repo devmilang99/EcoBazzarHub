@@ -173,10 +173,9 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Clears all data from all tables in the database.
   Future<void> clearAllData() async {
     await transaction(() async {
-      await delete(appSettings).go();
+      // Intentionally not deleting appSettings so permissions, theme, etc are kept
       await delete(cartItems).go();
       await delete(orderItemsTable).go();
       await delete(orders).go();

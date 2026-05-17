@@ -54,6 +54,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           Image.network(
             'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1974&auto=format&fit=crop',
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => const Center(
+              child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+            ),
           ),
           // Gradient Overlay
           Container(

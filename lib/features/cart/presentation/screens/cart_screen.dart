@@ -967,6 +967,10 @@ class _CartItemTile extends StatelessWidget {
               width: 80,
               height: 80,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 80, height: 80, color: Colors.grey[200],
+                child: const Icon(Icons.broken_image_rounded, color: Colors.grey),
+              ),
             ),
           ),
           const SizedBox(width: 16),

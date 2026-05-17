@@ -1,5 +1,4 @@
 import 'package:eco_bazzar_hub/features/auth/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:eco_bazzar_hub/features/auth/presentation/screens/login_screen.dart';
 import 'package:eco_bazzar_hub/features/profile/presentation/screens/deactivate_account_screen.dart';
 import 'package:eco_bazzar_hub/features/profile/presentation/screens/delete_account_screen.dart';
 import 'package:eco_bazzar_hub/features/profile/presentation/screens/profile_settings_screen.dart';

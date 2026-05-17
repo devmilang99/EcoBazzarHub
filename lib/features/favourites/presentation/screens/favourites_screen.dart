@@ -200,6 +200,12 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
                                       child: Image.network(
                                         product.productImageUrl,
                                         fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Container(
+                                          color: Colors.grey[200],
+                                          child: const Center(
+                                            child: Icon(Icons.broken_image_rounded, color: Colors.grey),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),

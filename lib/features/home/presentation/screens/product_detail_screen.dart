@@ -171,7 +171,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.network(widget.product.image, fit: BoxFit.cover),
+                        Image.network(
+                          widget.product.image, 
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+                            ),
+                          ),
+                        ),
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -816,6 +825,10 @@ class _ProductCheckoutSheetState extends ConsumerState<_ProductCheckoutSheet> {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 80, height: 80, color: Colors.grey[200],
+                    child: const Icon(Icons.broken_image_rounded, color: Colors.grey),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),

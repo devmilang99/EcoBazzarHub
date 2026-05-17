@@ -17,6 +17,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authViewModelProvider.notifier).clearError();
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     super.dispose();

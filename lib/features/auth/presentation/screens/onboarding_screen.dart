@@ -104,6 +104,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Image.network(
                     _onboardingData[index].imageUrl,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Colors.black,
+                      child: const Center(
+                        child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+                      ),
+                    ),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(

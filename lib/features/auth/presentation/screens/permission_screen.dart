@@ -140,6 +140,9 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                 Image.network(
                   info.imageUrl,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+                  ),
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(color: Colors.black);

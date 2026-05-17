@@ -23,6 +23,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authViewModelProvider.notifier).clearError();
+    });
     _loadSavedEmail();
   }
 
@@ -99,6 +102,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               fit: BoxFit.cover,
               cacheHeight: 800,
               cacheWidth: 400,
+              errorBuilder: (context, error, stackTrace) => const Center(
+                child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+              ),
             ),
           ),
           // Gradient Overlay
@@ -472,27 +478,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showLoadingDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 20),
-            Text(
-              "Authenticating...",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Please wait while we verify your account.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-            ),
-          ],
+      barrierColor: isDark ? Colors.black : Colors.white,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[900] : Colors.grey[100],
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_user_rounded,
+                  size: 56,
+                  color: Colors.green,
+                ),
+              ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+              const SizedBox(height: 32),
+              const CircularProgressIndicator(color: Colors.green, strokeWidth: 3),
+              const SizedBox(height: 24),
+              Text(
+                "Securely signing you in...",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ).animate().fadeIn(delay: 200.ms),
+              const SizedBox(height: 12),
+              Text(
+                "Hang tight while we prepare your eco-friendly shopping experience.",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ).animate().fadeIn(delay: 400.ms),
+            ],
+          ),
         ),
       ),
     );

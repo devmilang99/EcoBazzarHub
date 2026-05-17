@@ -450,6 +450,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Image.network(
                                     _sliderImages[index],
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+                                      ),
+                                    ),
                                   ),
                                   Container(
                                     decoration: BoxDecoration(
@@ -774,7 +780,16 @@ class _ProductCard extends StatelessWidget {
                   ),
                   child: Hero(
                     tag: 'product_${product.id}',
-                    child: Image.network(product.image, fit: BoxFit.cover),
+                    child: Image.network(
+                      product.image, 
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(Icons.broken_image_rounded, color: Colors.grey),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 Positioned(
